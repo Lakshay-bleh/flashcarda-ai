@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { SignOutButton } from '@clerk/nextjs';
 import { supabase } from '../../../../lib/supabase';
-import FlashcardGenerator from '../../../../components/FlashcardGenerator';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { motion } from 'framer-motion';
@@ -16,7 +16,7 @@ type Flashcard = {
 
 export default function DeckPage() {
   const params = useParams();
-  const deckId = params?.deckId as string;
+  const deckId = params?.deckId as string | undefined;
 
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,6 +25,18 @@ export default function DeckPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editQuestion, setEditQuestion] = useState('');
   const [editAnswer, setEditAnswer] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
+
+  // Guard if no deckId, can show a message or redirect if you want
+  useEffect(() => {
+    if (!deckId) {
+      toast.error('Invalid deck ID');
+      setIsLoading(false);
+      return;
+    }
+    fetchFlashcards();
+  }, [deckId]);
 
   const fetchFlashcards = async () => {
     if (!deckId) return;
@@ -36,15 +48,14 @@ export default function DeckPage() {
       .order('id', { ascending: false });
 
     if (!error) setFlashcards(data || []);
+    else toast.error('Failed to fetch flashcards');
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    fetchFlashcards();
-  }, [deckId]);
-
   const addCard = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!deckId) return;
+
     const { data, error } = await supabase
       .from('flashcards')
       .insert([{ question, answer, deck_id: deckId }])
@@ -61,6 +72,7 @@ export default function DeckPage() {
   };
 
   const handleSave = async (id: string) => {
+    setEditLoading(true);
     const { data, error } = await supabase
       .from('flashcards')
       .update({ question: editQuestion, answer: editAnswer })
@@ -76,23 +88,52 @@ export default function DeckPage() {
     } else {
       toast.error('Failed to update flashcard');
     }
+    setEditLoading(false);
   };
 
   const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this flashcard?')) return;
+
+    setDeleteLoadingId(id);
     const { error } = await supabase.from('flashcards').delete().eq('id', id);
     if (!error) {
       setFlashcards((prev) => prev.filter((card) => card.id !== id));
       toast.success('Flashcard deleted');
+      if (editingId === id) setEditingId(null);
     } else {
       toast.error('Failed to delete flashcard');
     }
+    setDeleteLoadingId(null);
   };
+
+  if (!deckId) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <p className="text-red-500">Invalid deck ID.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto transition-colors">
-      <h1 className="text-4xl font-bold text-center mb-12">🧠 Flashcards</h1>
 
-      <FlashcardGenerator deckId={deckId} onGenerated={fetchFlashcards} />
+       <header className="flex rounded-lg items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-50">
+        <div className="flex-1">
+          {/* empty to push the title to center */}
+        </div>
+
+        <h1 className="text-4xl font-bold text-center flex-1">
+          🧠 Flashcards
+        </h1>
+
+        <div className="flex-1 flex justify-end">
+          <SignOutButton>
+            <button className="px-4 py-2 bg-red-600 hover:bg-red-700 transition text-white rounded-md font-semibold">
+              Sign Out
+            </button>
+          </SignOutButton>
+        </div>
+      </header>
 
       {/* Add Flashcard Form */}
       <form
@@ -127,7 +168,10 @@ export default function DeckPage() {
           <p className="text-xs text-right text-gray-500 dark:text-gray-400">{answer.length}/500</p>
         </div>
 
-        <button className="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-2 rounded-md font-semibold">
+        <button
+          disabled={isLoading}
+          className="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-2 rounded-md font-semibold disabled:opacity-50"
+        >
           ➕ Add Flashcard
         </button>
       </form>
@@ -156,6 +200,7 @@ export default function DeckPage() {
                       onChange={(e) => setEditQuestion(e.target.value.slice(0, 500))}
                       className="w-full p-3 border rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                       maxLength={500}
+                      disabled={editLoading}
                     />
                   </div>
 
@@ -166,23 +211,28 @@ export default function DeckPage() {
                       onChange={(e) => setEditAnswer(e.target.value.slice(0, 500))}
                       className="w-full p-3 border rounded-md border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100"
                       maxLength={500}
+                      disabled={editLoading}
                     />
                   </div>
 
-                  <div className="prose prose-sm dark:prose-invert bg-gray-50 dark:bg-gray-900 p-4 rounded border border-gray-100 dark:border-gray-700 text-sm">
+                  <div className="prose prose-sm dark:prose-invert bg-gray-50 dark:bg-gray-900 p-4 rounded border border-gray-100 dark:border-gray-700 text-sm mb-6">
                     <ReactMarkdown>{editAnswer || 'Markdown preview will appear here...'}</ReactMarkdown>
                   </div>
 
                   <div className="mt-6 flex gap-3">
                     <button
-                      onClick={() => handleSave(card.id)}
+                      onClick={async () => await handleSave(card.id)}
                       className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
+                      disabled={editLoading}
                     >
                       💾 Save
                     </button>
                     <button
-                      onClick={() => setEditingId(null)}
+                      onClick={() => {
+                        if (!editLoading) setEditingId(null);
+                      }}
                       className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
+                      disabled={editLoading}
                     >
                       Cancel
                     </button>
@@ -212,14 +262,16 @@ export default function DeckPage() {
                         setEditAnswer(card.answer);
                       }}
                       className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
+                      disabled={deleteLoadingId === card.id}
                     >
                       ✏️ Edit
                     </button>
                     <button
-                      onClick={() => handleDelete(card.id)}
+                      onClick={async () => await handleDelete(card.id)}
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+                      disabled={deleteLoadingId === card.id}
                     >
-                      🗑 Delete
+                      {deleteLoadingId === card.id ? 'Deleting...' : '🗑 Delete'}
                     </button>
                   </div>
                 </>
