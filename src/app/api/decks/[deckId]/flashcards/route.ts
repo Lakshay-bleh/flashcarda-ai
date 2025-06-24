@@ -1,14 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '../../../../../lib/supabase';
 
-type Params = {
-  params: {
-    deckId: string;
-  };
-};
-
-export async function GET(req: NextRequest, context: Params) {
-  const { deckId } = context.params;
+export async function GET(req: NextRequest, { params }: { params: { deckId: string } }) {
+  const { deckId } = params;
 
   try {
     const { data, error } = await supabase
@@ -23,14 +17,13 @@ export async function GET(req: NextRequest, context: Params) {
 
     return NextResponse.json(data);
   } catch (err) {
-    console.error(err);
+    console.log(err);
     return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
   }
 }
 
-export async function POST(req: NextRequest, context: Params) {
-  const { deckId } = context.params;
-
+export async function POST(req: NextRequest, { params }: { params: { deckId: string } }) {
+  const { deckId } = params;
   try {
     const { question, answer } = await req.json();
 
@@ -50,7 +43,7 @@ export async function POST(req: NextRequest, context: Params) {
 
     return NextResponse.json(data);
   } catch (err) {
-    console.error(err);
+    console.log(err);
     return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
   }
 }
