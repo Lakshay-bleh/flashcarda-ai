@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '../../../../../../lib/supabase';
 
-export async function PATCH(req: NextRequest, { params }: { params: { deckId: string, flashcardId: string } }) {
-  const { flashcardId } = params;
+type Params = {
+  params: {
+    deckId: string;
+    flashcardId: string;
+  };
+};
+
+export async function PATCH(req: NextRequest, context: Params) {
+  const { flashcardId } = context.params;
 
   try {
     const { question, answer } = await req.json();
@@ -20,13 +27,13 @@ export async function PATCH(req: NextRequest, { params }: { params: { deckId: st
 
     return NextResponse.json(data);
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { deckId: string, flashcardId: string } }) {
-  const { flashcardId } = params;
+export async function DELETE(req: NextRequest, context: Params) {
+  const { flashcardId } = context.params;
 
   try {
     const { error } = await supabase
@@ -40,7 +47,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { deckId: s
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
   }
 }

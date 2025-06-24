@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '../../../lib/supabase';
+import { z } from 'zod';
+
+// Zod schema for validating POST input
+const deckSchema = z.object({
+  name: z.string().min(1, 'Deck name is required'),
+  description: z.string().optional(),
+  userId: z.string().uuid('Invalid userId format'),
+});
 
 export async function GET(req: NextRequest) {
   try {
-    const appUserId = req.nextUrl.searchParams.get('userId');
-    if (!appUserId) {
-      return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
+    const userId = req.nextUrl.searchParams.get('userId');
+
+    if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+      return NextResponse.json({ error: 'Missing or invalid userId' }, { status: 400 });
     }
 
     const { data, error } = await supabase
       .from('decks')
       .select('*')
-      .eq('user_id', appUserId)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -29,11 +38,16 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, description, userId } = body;
+    const result = deckSchema.safeParse(body);
 
-    if (!name || !userId) {
-      return NextResponse.json({ error: 'Missing name or userId' }, { status: 400 });
+    if (!result.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: result.error.flatten() },
+        { status: 400 }
+      );
     }
+
+    const { name, description, userId } = result.data;
 
     const { data, error } = await supabase
       .from('decks')
