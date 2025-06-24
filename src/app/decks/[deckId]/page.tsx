@@ -1,12 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-import { SignOutButton } from '@clerk/nextjs';
-import { supabase } from '../../../../lib/supabase';
+import { useParams, useRouter } from 'next/navigation';
+import { SignOutButton, useUser } from '@clerk/nextjs';
+import { supabase } from '../../../lib/supabase';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import { motion } from 'framer-motion';
+import { updateUserStats } from '../../../lib/stats';
+import FlashcardGenerator from '../../../../components/FlashcardGenerator';
 
 type Flashcard = {
   id: string;
@@ -16,7 +18,9 @@ type Flashcard = {
 
 export default function DeckPage() {
   const params = useParams();
+  const router = useRouter();
   const deckId = params?.deckId as string | undefined;
+  const { user } = useUser();
 
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,66 +31,98 @@ export default function DeckPage() {
   const [editAnswer, setEditAnswer] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [deckName, setDeckName] = useState<string>('');
 
-  // Guard if no deckId, can show a message or redirect if you want
   useEffect(() => {
     if (!deckId) {
       toast.error('Invalid deck ID');
       setIsLoading(false);
       return;
     }
+
+    const fetchDeckName = async () => {
+      const { data, error } = await supabase
+        .from('decks')           // Assuming your deck table is named 'decks'
+        .select('name')          // Select the name column
+        .eq('id', deckId)        // Filter by deckId
+        .single();               // Get single row
+
+      if (error) {
+        toast.error('Failed to fetch deck name');
+      } else if (data) {
+        setDeckName(data.name);
+      }
+    };
+
+    const fetchFlashcards = async () => {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('deck_id', deckId)
+        .order('id', { ascending: false });
+
+      if (error) {
+        toast.error('Failed to fetch flashcards');
+      } else {
+        setFlashcards(data || []);
+      }
+      setIsLoading(false);
+    };
+    fetchDeckName(); 
     fetchFlashcards();
   }, [deckId]);
-
-  const fetchFlashcards = async () => {
-    if (!deckId) return;
-    setIsLoading(true);
-    const { data, error } = await supabase
-      .from('flashcards')
-      .select('*')
-      .eq('deck_id', deckId)
-      .order('id', { ascending: false });
-
-    if (!error) setFlashcards(data || []);
-    else toast.error('Failed to fetch flashcards');
-    setIsLoading(false);
-  };
 
   const addCard = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!deckId) return;
+    if (!user) {
+      toast.error('You must be logged in to add flashcards.');
+      return;
+    }
 
+    setAdding(true);
     const { data, error } = await supabase
       .from('flashcards')
       .insert([{ question, answer, deck_id: deckId }])
-      .select();
+      .select()
+      .single();
 
-    if (!error && data) {
-      setFlashcards((prev) => [data[0], ...prev]);
+    if (error || !data) {
+      toast.error('Failed to add flashcard');
+    } else {
+      setFlashcards((prev) => [data, ...prev]);
       toast.success('Flashcard added!');
       setQuestion('');
       setAnswer('');
-    } else {
-      toast.error('Failed to add flashcard');
+      await updateUserStats(user.id, 10);
     }
+    setAdding(false);
   };
 
   const handleSave = async (id: string) => {
+    if (!user) {
+      toast.error('You must be logged in to update flashcards.');
+      return;
+    }
+
     setEditLoading(true);
     const { data, error } = await supabase
       .from('flashcards')
       .update({ question: editQuestion, answer: editAnswer })
       .eq('id', id)
-      .select();
+      .select()
+      .single();
 
-    if (!error && data) {
+    if (error || !data) {
+      toast.error('Failed to update flashcard');
+    } else {
       setFlashcards((prev) =>
-        prev.map((card) => (card.id === id ? data[0] : card))
+        prev.map((card) => (card.id === id ? data : card))
       );
       toast.success('Flashcard updated');
       setEditingId(null);
-    } else {
-      toast.error('Failed to update flashcard');
     }
     setEditLoading(false);
   };
@@ -96,12 +132,13 @@ export default function DeckPage() {
 
     setDeleteLoadingId(id);
     const { error } = await supabase.from('flashcards').delete().eq('id', id);
-    if (!error) {
+
+    if (error) {
+      toast.error('Failed to delete flashcard');
+    } else {
       setFlashcards((prev) => prev.filter((card) => card.id !== id));
       toast.success('Flashcard deleted');
       if (editingId === id) setEditingId(null);
-    } else {
-      toast.error('Failed to delete flashcard');
     }
     setDeleteLoadingId(null);
   };
@@ -116,26 +153,49 @@ export default function DeckPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-12 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto transition-colors">
+      <header className="flex rounded-lg items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-50">
+        {deckId && (
+          <button
+            onClick={() => {
+              const slug = encodeURIComponent('flashcards');
+              const shareUrl = `${window.location.origin}/share/${deckId}/${slug}`;
+              navigator.clipboard.writeText(shareUrl);
+              toast.success('Deck link copied to clipboard!');
+            }}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 transition text-white rounded-md font-semibold"
+          >
+            🔗 Share
+          </button>
+        )}
 
-       <header className="flex rounded-lg items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 sticky top-0 z-50">
-        <div className="flex-1">
-          {/* empty to push the title to center */}
-        </div>
-
+        {/* Deck Name in center */}
         <h1 className="text-4xl font-bold text-center flex-1">
-          🧠 Flashcards
+          🧠 {deckName || 'Deck Name'}
         </h1>
 
-        <div className="flex-1 flex justify-end">
-          <SignOutButton>
-            <button className="px-4 py-2 bg-red-600 hover:bg-red-700 transition text-white rounded-md font-semibold">
-              Sign Out
-            </button>
-          </SignOutButton>
-        </div>
+        <SignOutButton>
+          <button className="px-4 py-2 bg-red-600 hover:bg-red-700 transition text-white rounded-md font-semibold">
+            Sign Out
+          </button>
+        </SignOutButton>
       </header>
 
-      {/* Add Flashcard Form */}
+
+      <FlashcardGenerator deckId={deckId} onGenerated={() => {
+        // Refresh flashcards after generation
+        setIsLoading(true);
+        supabase
+          .from('flashcards')
+          .select('*')
+          .eq('deck_id', deckId)
+          .order('id', { ascending: false })
+          .then(({ data, error }) => {
+            if (error) toast.error('Failed to fetch flashcards');
+            else setFlashcards(data || []);
+            setIsLoading(false);
+          });
+      }} />
+
       <form
         onSubmit={addCard}
         className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-12 space-y-6 border border-gray-200 dark:border-gray-700"
@@ -169,14 +229,22 @@ export default function DeckPage() {
         </div>
 
         <button
-          disabled={isLoading}
+          disabled={isLoading || adding}
           className="w-full bg-blue-600 hover:bg-blue-700 transition text-white py-2 rounded-md font-semibold disabled:opacity-50"
         >
           ➕ Add Flashcard
         </button>
       </form>
 
-      {/* Flashcard List */}
+      <div className="mb-8 flex justify-center">
+        <button
+          onClick={() => router.push(`/decks/${deckId}/study`)}
+          className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md font-semibold transition"
+        >
+          🧠 Start Studying
+        </button>
+      </div>
+
       {isLoading ? (
         <div className="flex justify-center items-center h-40">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
@@ -221,16 +289,14 @@ export default function DeckPage() {
 
                   <div className="mt-6 flex gap-3">
                     <button
-                      onClick={async () => await handleSave(card.id)}
+                      onClick={() => handleSave(card.id)}
                       className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
                       disabled={editLoading}
                     >
                       💾 Save
                     </button>
                     <button
-                      onClick={() => {
-                        if (!editLoading) setEditingId(null);
-                      }}
+                      onClick={() => !editLoading && setEditingId(null)}
                       className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md"
                       disabled={editLoading}
                     >
@@ -267,11 +333,21 @@ export default function DeckPage() {
                       ✏️ Edit
                     </button>
                     <button
-                      onClick={async () => await handleDelete(card.id)}
+                      onClick={() => handleDelete(card.id)}
                       className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
                       disabled={deleteLoadingId === card.id}
                     >
                       {deleteLoadingId === card.id ? 'Deleting...' : '🗑 Delete'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        const shareUrl = `${window.location.origin}/share/${deckId}/flashcard/${card.id}`;
+                        navigator.clipboard.writeText(shareUrl);
+                        toast.success('Flashcard link copied to clipboard!');
+                      }}
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md"
+                    >
+                      🔗 Share
                     </button>
                   </div>
                 </>

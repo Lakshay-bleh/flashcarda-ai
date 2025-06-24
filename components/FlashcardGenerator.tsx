@@ -1,18 +1,31 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
+import { useState, useEffect } from 'react';
+import { supabase } from '../src/lib/supabase';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import { motion } from 'framer-motion';
 
-function debounce<T extends (...args: any[]) => void>(fn: T, delay: number) {
+// Type for flashcard
+type Flashcard = {
+  question: string;
+  answer: string;
+};
+
+// Type-safe debounce
+function debounce<Args extends unknown[], Return>(
+  fn: (...args: Args) => Return,
+  delay: number
+): (...args: Args) => void {
   let timeoutId: ReturnType<typeof setTimeout>;
-  return (...args: Parameters<T>) => {
+  return (...args: Args) => {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn(...args), delay);
+    timeoutId = setTimeout(() => {
+      void fn(...args);
+    }, delay);
   };
 }
+
 
 export default function FlashcardGenerator({
   deckId,
@@ -25,13 +38,10 @@ export default function FlashcardGenerator({
   const [numQuestions, setNumQuestions] = useState(3);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [previewFlashcards, setPreviewFlashcards] = useState<
-    { question: string; answer: string }[]
-  >([]);
+  const [previewFlashcards, setPreviewFlashcards] = useState<Flashcard[]>([]);
 
-  // Function to fetch flashcards preview from backend
-  const fetchPreview = useCallback(
-    debounce(async (inputText: string, numQ: number) => {
+  useEffect(() => {
+    const fetchPreview = debounce(async (inputText: string, numQ: number) => {
       if (!inputText.trim()) {
         setPreviewFlashcards([]);
         setError('');
@@ -60,22 +70,17 @@ export default function FlashcardGenerator({
           setError('');
         }
       } catch (err) {
-        console.log(err)
+        console.error(err);
         setError('Failed to generate preview.');
         setPreviewFlashcards([]);
       } finally {
         setLoading(false);
       }
-    }, 800),
-    []
-  );
+    }, 800);
 
-  // Trigger preview fetch when text or numQuestions changes
-  useEffect(() => {
     fetchPreview(text, numQuestions);
-  }, [text, numQuestions, fetchPreview]);
+  }, [text, numQuestions]);
 
-  // Original generate function to save generated flashcards
   const generate = async () => {
     if (!deckId || !text.trim()) return;
 
@@ -92,7 +97,7 @@ export default function FlashcardGenerator({
       if (!res.ok) throw new Error('Backend failed');
 
       const data = await res.json();
-      const inserts = data.flashcards.map((fc: { question: string; answer: string }) => ({
+      const inserts = data.flashcards.map((fc: Flashcard) => ({
         ...fc,
         deck_id: deckId,
       }));
@@ -158,7 +163,9 @@ export default function FlashcardGenerator({
         <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Live Preview</h3>
         {loading && <p className="text-gray-500 dark:text-gray-400">Loading preview...</p>}
         {!loading && previewFlashcards.length === 0 && (
-          <p className="text-gray-500 dark:text-gray-400 italic">Flashcards preview will appear here...</p>
+          <p className="text-gray-500 dark:text-gray-400 italic">
+            Flashcards preview will appear here...
+          </p>
         )}
         <ul className="space-y-4">
           {previewFlashcards.map((fc, i) => (
@@ -168,13 +175,13 @@ export default function FlashcardGenerator({
             >
               <p className="font-semibold text-gray-700 dark:text-gray-300">Q:</p>
               <div className="mb-2 text-gray-900 dark:text-gray-100">
-                <ReactMarkdown >{fc.question}</ReactMarkdown>
+                <ReactMarkdown>{fc.question}</ReactMarkdown>
               </div>
-              
+
               <p className="font-semibold text-gray-700 dark:text-gray-300">A:</p>
               <div className="text-gray-800 dark:text-gray-200">
-                <ReactMarkdown >{fc.answer}</ReactMarkdown>
-              </div>       
+                <ReactMarkdown>{fc.answer}</ReactMarkdown>
+              </div>
             </li>
           ))}
         </ul>

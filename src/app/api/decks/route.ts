@@ -1,6 +1,5 @@
-// src/app/api/decks/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '../../../../lib/supabase'; // adjust if needed
+import { supabase } from '../../../lib/supabase';
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,7 +8,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Missing userId' }, { status: 400 });
     }
 
-    // Fetch decks directly using app user UUID
     const { data, error } = await supabase
       .from('decks')
       .select('*')
@@ -31,13 +29,12 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, description, userId } = body; // now expecting appUserId directly
+    const { name, description, userId } = body;
 
     if (!name || !userId) {
       return NextResponse.json({ error: 'Missing name or userId' }, { status: 400 });
     }
 
-    // Insert new deck with user_id
     const { data, error } = await supabase
       .from('decks')
       .insert([{ name, description, user_id: userId }])
