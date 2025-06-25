@@ -1,13 +1,12 @@
-// src/app/decks/[deckId]/study/page.tsx
-
 import StudyModePage from './StudyModeClient';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     deckId: string;
-  };
+  }>;
 }
 
-export default function Page({ params }: PageProps) {
-  return <StudyModePage deckId={params.deckId} />;
+export default async function Page({ params }: PageProps) {
+  const { deckId } = await params; // correct placement
+  return <StudyModePage deckId={deckId} />;
 }

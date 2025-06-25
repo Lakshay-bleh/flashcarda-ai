@@ -1,9 +1,11 @@
 import { supabase } from '../../../../../lib/supabase';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function PATCH(req: Request, { params }: { params: { deckId: string } }) {
-  const { name, description, is_public } = await req.json();
-  const { deckId } = params;
+export async function PATCH(
+  request: NextRequest, 
+  { params }: { params: Promise<{ deckId: string }> }) {
+  const { name, description, is_public } = await request.json();
+  const { deckId } = await params;
 
   const { data, error } = await supabase
     .from('decks')

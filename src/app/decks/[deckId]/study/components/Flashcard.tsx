@@ -24,8 +24,7 @@ export default function Flashcard({
     >
       <motion.div
         className="relative w-full h-48 bg-white dark:bg-gray-800 shadow rounded-lg p-4"
-        style={{ transformStyle: 'preserve-3d' }}
-        animate={{ rotateY: flipped ? 180 : 0 }}
+        animate={{ rotateY: flipped ? 180 : 0, transformStyle: 'preserve-3d' }}
         transition={{ duration: 0.5 }}
       >
         <div className="absolute inset-0 flex items-center justify-center text-lg" style={{ backfaceVisibility: 'hidden' }}>

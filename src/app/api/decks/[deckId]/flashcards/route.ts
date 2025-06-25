@@ -1,49 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '../../../../../lib/supabase';
+import { type NextRequest, NextResponse } from "next/server"
+import { supabase } from "../../../../../lib/supabase"
 
-export async function GET(req: NextRequest, { params }: { params: { deckId: string } }) {
-  const { deckId } = params;
+export async function GET(request: NextRequest, { params }: { params: Promise<{ deckId: string }> }) {
+  const { deckId } = await params
 
   try {
-    const { data, error } = await supabase
-      .from('flashcards')
-      .select('*')
-      .eq('deck_id', deckId)
-      .order('created_at', { ascending: false });
+    const { data: flashcards, error } = await supabase
+      .from("flashcards")
+      .select("*")
+      .eq("deck_id", deckId)
+      .order("created_at", { ascending: true })
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data);
-  } catch (err) {
-    console.log(err);
-    return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
+    return NextResponse.json(flashcards)
+  } catch (error) {
+    console.error("Error fetching flashcards:", error)
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { deckId: string } }) {
-  const { deckId } = params;
+export async function POST(request: NextRequest, { params }: { params: Promise<{ deckId: string }> }) {
+  const { deckId } = await params
+
   try {
-    const { question, answer } = await req.json();
+    const { question, answer } = await request.json()
 
     if (!question || !answer) {
-      return NextResponse.json({ error: 'Missing question or answer' }, { status: 400 });
+      return NextResponse.json({ error: "Missing question or answer" }, { status: 400 })
     }
 
     const { data, error } = await supabase
-      .from('flashcards')
+      .from("flashcards")
       .insert([{ question, answer, deck_id: deckId }])
       .select()
-      .single();
+      .single()
 
     if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, { status: 201 })
   } catch (err) {
-    console.log(err);
-    return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
+    console.error("Error creating flashcard:", err)
+    return NextResponse.json({ error: "Unexpected error" }, { status: 500 })
   }
 }
