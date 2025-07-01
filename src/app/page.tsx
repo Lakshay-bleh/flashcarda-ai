@@ -1,6 +1,8 @@
+/* eslint-disable @next/next/no-page-custom-font */
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 export default function Home() {
   useEffect(() => {
@@ -69,30 +71,6 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center">
-                <svg className="h-8 w-8 text-indigo-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                </svg>
-                <span className="ml-2 text-xl font-bold text-gray-900">FlashDecks</span>
-              </div>
-            </div>
-            <div className="hidden sm:ml-6 sm:flex sm:items-center space-x-8">
-              <a href="/dashboard" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">Dashboard</a>
-              <a href="#" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">Features</a>
-              <a href="#" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">Pricing</a>
-              <a href="#" className="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm font-medium">About</a>
-              <a href="#" className="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">Get Started</a>
-            </div>
-          </div>
-        </div>
-      </nav>
-
       {/* Hero */}
       <section className="relative gradient-bg text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -106,18 +84,12 @@ export default function Home() {
                 Create, study, and master flashcards with our intelligent spaced repetition system.
               </p>
               <div className="mt-6">
-                <a
-                  href="#"
-                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50"
-                >
+                <Link href="/sign-up" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50">
                   Start Learning
-                </a>
-                <a
-                  href="#"
-                  className="ml-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-500 bg-opacity-60 hover:bg-opacity-70"
-                >
-                  See How It Works
-                </a>
+                </Link>
+                <Link href="/sign-up" className="ml-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-500 bg-opacity-60 hover:bg-opacity-70">
+                  See How it Works
+                </Link>
               </div>
             </div>
           </div>
@@ -221,88 +193,12 @@ export default function Home() {
           <p className="mt-4 text-lg leading-6 text-indigo-200">
             Join thousands of students who are learning more efficiently with our flashcard system.
           </p>
-          <a
-            href="#"
-            className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto"
-          >
+          <Link href="/sign-up" className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto">
             Sign up for free
-          </a>
+          </Link>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="bg-gray-800">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="xl:grid xl:grid-cols-3 xl:gap-8">
-            <div className="space-y-8 xl:col-span-1">
-              <div className="flex items-center">
-                <svg className="h-8 w-8 text-indigo-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
-                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                </svg>
-                <span className="ml-2 text-xl font-bold text-white">FlashDecks</span>
-              </div>
-              <p className="text-gray-300 text-base">
-                The smart way to study and retain information using scientifically proven techniques.
-              </p>
-            </div>
-
-            <div className="mt-12 grid grid-cols-2 gap-8 xl:mt-0 xl:col-span-2">
-              <div className="md:grid md:grid-cols-2 md:gap-8">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Product</h3>
-                  <ul className="mt-4 space-y-4">
-                    {['Features', 'Pricing', 'Examples', 'Updates'].map(item => (
-                      <li key={item}>
-                        <a href="#" className="text-base text-gray-400 hover:text-white">{item}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-12 md:mt-0">
-                  <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Support</h3>
-                  <ul className="mt-4 space-y-4">
-                    {['Documentation', 'Guides', 'API Status', 'Contact'].map(item => (
-                      <li key={item}>
-                        <a href="#" className="text-base text-gray-400 hover:text-white">{item}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="md:grid md:grid-cols-2 md:gap-8">
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Company</h3>
-                  <ul className="mt-4 space-y-4">
-                    {['About', 'Blog', 'Careers', 'Press'].map(item => (
-                      <li key={item}>
-                        <a href="#" className="text-base text-gray-400 hover:text-white">{item}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="mt-12 md:mt-0">
-                  <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">Legal</h3>
-                  <ul className="mt-4 space-y-4">
-                    {['Privacy', 'Terms', 'Cookie Policy'].map(item => (
-                      <li key={item}>
-                        <a href="#" className="text-base text-gray-400 hover:text-white">{item}</a>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 border-t border-gray-700 pt-8">
-            <p className="text-base text-gray-400 text-center">
-              &copy; 2023 FlashDecks. All rights reserved.
-            </p>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

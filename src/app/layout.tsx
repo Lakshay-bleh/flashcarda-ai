@@ -1,7 +1,8 @@
-// src/app/layout.tsx
 import { ClerkProvider } from '@clerk/nextjs';
 import '../styles/globals.css';
 import { Toaster } from 'sonner';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
 
 export const metadata = {
   title: 'Your App',
@@ -12,9 +13,20 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <ClerkProvider>
       <html lang="en">
-        <body>
+        <head>
+          <meta name="description" content={metadata.description} />
+          <meta property="og:title" content={metadata.title} />
+          <meta property="og:description" content={metadata.description} />
+          <meta property="og:type" content="website" />
+          <meta property="og:url" content="https://yourapp.com" />
+          <meta property="og:image" content="path/to/your/image.jpg" />
+          <title>{metadata.title}</title>
+        </head>
+        <body className="min-h-screen bg-white">
+          <Navbar />
           {children}
           <Toaster />
+          <Footer />
         </body>
       </html>
     </ClerkProvider>

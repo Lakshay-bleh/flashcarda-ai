@@ -6,13 +6,13 @@ import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
 import { motion } from 'framer-motion';
 
-// Type for flashcard
+// Flashcard type
 type Flashcard = {
   question: string;
   answer: string;
 };
 
-// Type-safe debounce
+// Debounce utility
 function debounce<Args extends unknown[], Return>(
   fn: (...args: Args) => Return,
   delay: number
@@ -25,7 +25,6 @@ function debounce<Args extends unknown[], Return>(
     }, delay);
   };
 }
-
 
 export default function FlashcardGenerator({
   deckId,
@@ -124,63 +123,62 @@ export default function FlashcardGenerator({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow mb-8"
+      className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/20 mb-12 space-y-6 transition-all hover:scale-[1.01] text-white"
     >
-      <h2 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">
-        🧠 Generate Flashcards
-      </h2>
+      <h2 className="text-3xl font-semibold drop-shadow mb-4">Generate Flashcards</h2>
 
       <textarea
+        rows={5}
+        className="w-full p-4 rounded-lg border border-white/20 bg-white/20 text-white placeholder-indigo-200 focus:ring-2 focus:ring-pink-300 focus:outline-none transition"
+        placeholder="Paste paragraph or text here..."
         value={text}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Paste paragraph or text here..."
-        rows={5}
-        className="w-full bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-gray-100 p-3 rounded mb-4 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
 
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-4">
         <input
           type="number"
           min={1}
           max={10}
           value={numQuestions}
           onChange={(e) => setNumQuestions(Number(e.target.value))}
-          className="w-24 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 p-2 rounded text-gray-900 dark:text-gray-100"
-          placeholder="Questions"
+          className="w-24 p-3 rounded-lg border border-white/20 bg-white/20 text-white"
         />
         <button
           onClick={generate}
           disabled={loading || !text.trim()}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded transition disabled:opacity-60"
+          className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
         >
           {loading ? 'Generating...' : '⚡ Generate'}
         </button>
       </div>
 
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+      {error && <p className="text-red-300">{error}</p>}
 
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2">Live Preview</h3>
-        {loading && <p className="text-gray-500 dark:text-gray-400">Loading preview...</p>}
+      <div>
+        <h3 className="text-2xl font-semibold mb-2">Live Preview</h3>
+        {loading && <p className="italic text-indigo-100">Loading preview...</p>}
         {!loading && previewFlashcards.length === 0 && (
-          <p className="text-gray-500 dark:text-gray-400 italic">
-            Flashcards preview will appear here...
-          </p>
+          <p className="italic text-indigo-100">Flashcards preview will appear here...</p>
         )}
-        <ul className="space-y-4">
+
+        <ul className="space-y-4 mt-4">
           {previewFlashcards.map((fc, i) => (
             <li
               key={i}
-              className="border border-gray-300 dark:border-gray-700 rounded p-3 bg-gray-50 dark:bg-gray-900 shadow-sm"
+              className="border border-white/20 rounded-xl p-4 bg-white/10 backdrop-blur"
             >
-              <p className="font-semibold text-gray-700 dark:text-gray-300">Q:</p>
-              <div className="mb-2 text-gray-900 dark:text-gray-100">
-                <ReactMarkdown>{fc.question}</ReactMarkdown>
+              <div className="mb-2">
+                <p className="text-indigo-100 font-semibold mb-1">Q:</p>
+                <div className="text-white">
+                  <ReactMarkdown>{fc.question}</ReactMarkdown>
+                </div>   
               </div>
-
-              <p className="font-semibold text-gray-700 dark:text-gray-300">A:</p>
-              <div className="text-gray-800 dark:text-gray-200">
-                <ReactMarkdown>{fc.answer}</ReactMarkdown>
+              <div>
+                <p className="text-indigo-100 font-semibold mb-1">A:</p>
+                <div className="text-white">
+                  <ReactMarkdown>{fc.answer}</ReactMarkdown>
+                </div>                
               </div>
             </li>
           ))}
