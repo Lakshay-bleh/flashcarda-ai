@@ -27,15 +27,16 @@ app.add_middleware(
 # Load spacy for simple noun chunk extraction as answers
 nlp = spacy.load("en_core_web_sm")
 
-# Load question generation model (requires highlighted answer)
-qg_model_name = "valhalla/t5-small-qg-hl"
+# Use large QG model
+qg_model_name = "valhalla/t5-large-qa-qg-hl"
 qg_tokenizer = AutoTokenizer.from_pretrained(qg_model_name)
 qg_model = AutoModelForSeq2SeqLM.from_pretrained(qg_model_name)
 qg_pipeline = pipeline("text2text-generation", model=qg_model, tokenizer=qg_tokenizer)
 
-# Load QA model for answer extraction from generated question
-qa_tokenizer = AutoTokenizer.from_pretrained("deepset/roberta-base-squad2")
-qa_model = AutoModelForQuestionAnswering.from_pretrained("deepset/roberta-base-squad2")
+# Use DeBERTa v3 large QA model
+qa_model_name = "deepset/deberta-v3-large-squad2"
+qa_tokenizer = AutoTokenizer.from_pretrained(qa_model_name)
+qa_model = AutoModelForQuestionAnswering.from_pretrained(qa_model_name)
 qa_pipeline = pipeline("question-answering", model=qa_model, tokenizer=qa_tokenizer)
 
 # Request schema
