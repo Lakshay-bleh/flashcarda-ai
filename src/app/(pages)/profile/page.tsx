@@ -3,6 +3,7 @@
 import { useUser } from '@clerk/nextjs';
 import EditProfileForm from './edit-form';
 import LoadingSpinner from '../../../../components/LoadingSpinner';
+import Image from 'next/image';
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
@@ -39,15 +40,17 @@ export default function ProfilePage() {
           backdrop-blur-sm
           transition-transform hover:scale-[1.01] hover:shadow-lg"
       >
-        <div className="flex items-center gap-6">
-          <img
+          <Image
             src={user.imageUrl}
             alt="Profile"
+            width={96}
+            height={96}
             className="w-24 h-24 rounded-full object-cover
               ring-2 ring-pink-400 ring-opacity-40
               shadow-md
               transition-transform hover:scale-105"
             draggable={false}
+            priority
           />
           <div>
             <h2 className="text-3xl font-extrabold mb-1 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 drop-shadow-sm">
@@ -62,7 +65,6 @@ export default function ProfilePage() {
         <div className="mt-10">
           <EditProfileForm userId={user.id} />
         </div>
-      </div>
     </div>
   );
 }

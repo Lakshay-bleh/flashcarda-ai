@@ -3,6 +3,12 @@ import '../styles/globals.css';
 import { Toaster } from 'sonner';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+});
 
 export const metadata = {
   title: 'Your App',
@@ -22,7 +28,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <meta property="og:image" content="path/to/your/image.jpg" />
           <title>{metadata.title}</title>
         </head>
-        <body className="min-h-screen bg-white">
+        <body className={`${inter.className} min-h-screen bg-white`}>
           <Navbar />
           {children}
           <Toaster />

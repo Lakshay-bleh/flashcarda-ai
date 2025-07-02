@@ -5,11 +5,7 @@ import Link from 'next/link';
 export default function FeaturesPage() {
   return (
     <div className="font-[Inter] bg-gray-50">
-      <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet"
-      />
-
+ 
       {/* Hero Section */}
       <section className="bg-indigo-700 text-white py-20">
         <div className="max-w-4xl mx-auto text-center px-4">

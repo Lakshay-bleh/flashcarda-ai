@@ -98,9 +98,9 @@ export default function SettingsPage() {
     setSettings(prev => ({ ...prev, [name]: newValue }));
   };
 
-  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSettings(prev => ({ ...prev, [e.target.name]: Number(e.target.value) }));
-  };
+  // const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setSettings(prev => ({ ...prev, [e.target.name]: Number(e.target.value) }));
+  // };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -219,7 +219,7 @@ export default function SettingsPage() {
               </label>
             </div> */}
 
-            Study Goal
+            {/* Study Goal
             <div>
               <label className="block text-sm font-medium text-indigo-100 mb-1">Daily Study Goal (cards)</label>
               <input
@@ -231,7 +231,7 @@ export default function SettingsPage() {
                 max={100}
                 className="w-full p-3 rounded-lg border border-white/20 bg-white/20 text-white placeholder-indigo-200"
               />
-            </div>
+            </div> */}
 
             {/* Spaced Repetition */}
             <div className="flex items-center gap-3">

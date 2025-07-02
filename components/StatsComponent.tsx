@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 type Stats = {
   decks: number;
@@ -17,15 +17,15 @@ const StatsComponent: React.FC<StatsComponentProps> = ({ userId }) => {
   const [stats, setStats] = useState<Stats | null>(null);
 
   // Fetch stats when the component is mounted or when userId changes
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     const response = await fetch(`/api/stats/${userId}`);
     const data = await response.json();
     setStats(data); // Assuming the updated stats are returned here
-  };
+  }, [userId]);
 
   useEffect(() => {
     fetchStats(); // Fetch stats when component mounts
-  }, [userId]); // Refetch when userId changes
+  }, [fetchStats]); // Refetch when fetchStats changes
 
   const incrementDecks = async () => {
     const response = await fetch('/api/update-stats', {
@@ -58,3 +58,4 @@ const StatsComponent: React.FC<StatsComponentProps> = ({ userId }) => {
 };
 
 export default StatsComponent;
+

@@ -90,12 +90,12 @@ export default function Footer(){
                     </Link>
                   </li>
                   <li>
-                    <Link href="/blog" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Blog
                     </Link>
                   </li>
                   <li>
-                    <Link href="/careers" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Careers
                     </Link>
                   </li>
@@ -107,17 +107,17 @@ export default function Footer(){
                 </h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="/privacy" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Privacy
                     </Link>
                   </li>
                   <li>
-                    <Link href="/terms" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Terms
                     </Link>
                   </li>
                   <li>
-                    <Link href="/cookie" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Cookie Policy
                     </Link>
                   </li>

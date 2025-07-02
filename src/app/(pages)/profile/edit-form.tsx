@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import toast from 'react-hot-toast';
 
 type Props = {
@@ -152,11 +153,14 @@ export default function EditProfileForm({ userId }: Props) {
           className="file:bg-pink-500 file:text-white file:px-5 file:py-2 file:rounded-lg file:font-semibold cursor-pointer hover:file:brightness-110 transition"
         />
         {profile.imageUrl && (
-          <img
+          <Image
             src={profile.imageUrl}
             alt="Profile Preview"
+            width={96}
+            height={96}
             className="w-24 h-24 rounded-full mt-4 border-2 border-pink-300 object-cover shadow ring-1 ring-white/20"
             draggable={false}
+            unoptimized
           />
         )}
       </div>

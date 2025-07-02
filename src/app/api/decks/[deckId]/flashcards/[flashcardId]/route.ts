@@ -3,9 +3,9 @@ import { supabase } from "../../../../../../lib/supabase";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { deckId: string } }
+  { params }: { params: Promise<{ deckId: string } >}
 ) {
-  const { deckId } = params;
+  const { deckId } = await params;
 
   try {
     // Fetch all flashcards that belong to the given deckId

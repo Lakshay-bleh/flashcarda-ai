@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { supabase } from "../../../../lib/supabase";
+import { getAuth } from "@clerk/nextjs/server";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ deckId: string }> }) {
   const { deckId } = await params;

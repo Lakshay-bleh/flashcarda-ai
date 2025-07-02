@@ -5,10 +5,6 @@ import Link from 'next/link';
 export default function AboutPage() {
   return (
     <div className="font-[Inter] bg-white text-gray-900">
-      <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet"
-      />
 
       {/* Hero */}
       <section className="bg-indigo-700 text-white py-20">

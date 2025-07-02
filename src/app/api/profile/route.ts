@@ -100,6 +100,8 @@ export async function GET(req: Request) {
       .eq('user_id', userId)
       .maybeSingle();
 
+    
+
     if (error) {
       console.error('Supabase error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -125,6 +127,7 @@ export async function GET(req: Request) {
       }
 
       profile = insertedProfile;
+      error = insertError;
     }
 
     if (!profile) {
