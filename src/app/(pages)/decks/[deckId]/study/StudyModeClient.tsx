@@ -23,9 +23,18 @@ function calculateScore(
   maxStreak: number,
   elapsedTime: number,
   totalQuestions: number,
-  maxTimeAllowed: number
+  maxTimeAllowed: number,
+  knownCount: number,
+  responseTimes: number[]
 ): number {
   if (totalQuestions === 0) return 0;
+
+  // If all unknown
+  if (knownCount === 0) return 0;
+
+  // If all known and all answers under 5 seconds
+  const allUnder5Sec = responseTimes.every(time => time < 5);
+  if (knownCount === totalQuestions && allUnder5Sec) return 100;
 
   const streakScore = Math.min(maxStreak / totalQuestions, 1);
   const timeScore = Math.min(elapsedTime / maxTimeAllowed, 1);
@@ -38,6 +47,7 @@ function calculateScore(
 
   return Math.round(combinedScore * 100);
 }
+
 
 function FinalStatsCard({
   total,
@@ -54,7 +64,7 @@ function FinalStatsCard({
 }) {
   const minutes = Math.floor(elapsed / 60);
   const seconds = elapsed % 60;
-  const score = calculateScore(maxStreak, elapsed, total, 300);
+  const score = calculateScore(maxStreak, elapsed, total, 300, known, []); // Pass known as knownCount and [] as responseTimes
 
   return (
     <Paper

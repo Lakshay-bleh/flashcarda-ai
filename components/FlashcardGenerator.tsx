@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect,useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../src/lib/supabase';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -54,7 +54,6 @@ export default function FlashcardGenerator({
     return parsed;
   })();
 
-  // Debounced preview fetch - stable function using useCallback and useRef
   const debouncedFetchPreview = useRef(
     debounce(async (inputText: string, numQ: number) => {
       if (generatingRef.current) return; // skip if generating
@@ -96,7 +95,6 @@ export default function FlashcardGenerator({
     }, 800)
   ).current;
 
-  // useEffect triggers preview fetch when text or numQuestionsStr changes, but only if not generating
   useEffect(() => {
     if (!generatingRef.current) {
       debouncedFetchPreview(text, numQuestions);
@@ -161,11 +159,17 @@ export default function FlashcardGenerator({
     } finally {
       setLoadingGenerate(false);
       generatingRef.current = false;
-      // Trigger preview fetch again after generation completes
       if (text.trim()) {
         debouncedFetchPreview(text, numQuestions);
       }
     }
+  };
+
+  const clearInputs = () => {
+    setText('');
+    setNumQuestionsStr('3');
+    setPreviewFlashcards([]);
+    setError('');
   };
 
   return (
@@ -193,12 +197,10 @@ export default function FlashcardGenerator({
           max={10}
           value={numQuestionsStr}
           onChange={(e) => {
-            // Only allow digits, no leading zeros (except for zero itself)
             const val = e.target.value;
             if (val === '') {
               setNumQuestionsStr('');
             } else if (/^\d+$/.test(val)) {
-              // remove leading zeros
               const sanitized = val.replace(/^0+/, '') || '0';
               setNumQuestionsStr(sanitized);
             }
@@ -212,6 +214,13 @@ export default function FlashcardGenerator({
           className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
         >
           {loadingGenerate ? 'Generating...' : '⚡ Generate'}
+        </button>
+        <button
+          onClick={clearInputs}
+          disabled={loadingGenerate}
+          className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
+        >
+          Clear
         </button>
       </div>
 
