@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { toast } from 'sonner';
+import { useRouter } from 'next/navigation'; // or 'next/router' if using pages router
 
 type Props = {
   userId: string;
@@ -17,6 +18,8 @@ type ProfileData = {
 };
 
 export default function EditProfileForm({ userId }: Props) {
+  const router = useRouter();
+
   const [profile, setProfile] = useState<ProfileData>({
     full_name: '',
     username: '',
@@ -123,7 +126,6 @@ export default function EditProfileForm({ userId }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Clear previous username uniqueness error
     setUsernameError(null);
 
     if (!validateFields()) return;
@@ -132,9 +134,11 @@ export default function EditProfileForm({ userId }: Props) {
 
     const toastId = toast.loading('Validating username...');
 
-    const isUnique = await fetch(`/api/check-username?username=${encodeURIComponent(profile.username)}&userId=${userId}`)
-      .then(res => res.json())
-      .then(data => data.isUnique);
+    const isUnique = await fetch(
+      `/api/check-username?username=${encodeURIComponent(profile.username)}&userId=${userId}`
+    )
+      .then((res) => res.json())
+      .then((data) => data.isUnique);
 
     if (!isUnique) {
       setUsernameError('This username is already taken.');
@@ -165,6 +169,8 @@ export default function EditProfileForm({ userId }: Props) {
 
       toast.dismiss(saveToastId);
       toast.success('Profile updated!');
+
+      router.push('/home'); // Redirect on success
     } catch {
       toast.dismiss(saveToastId);
       toast.error('Failed to save profile');

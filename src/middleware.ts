@@ -2,10 +2,25 @@ import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
 const isPublicRoute = createRouteMatcher([
-  '/',
-  '/sign-in(.*)',
-  '/sign-up(.*)',
-  '/decks/(.*)/shared/(.*)', // Allow shared deck routes to be public
+  '/',                        // homepage
+  '/sign-in(.*)',             // sign-in pages
+  '/sign-up(.*)',             // sign-up pages
+  '/decks/(.*)/shared/(.*)',  // public shared decks
+
+  // Footer-linked public pages only
+  '/features',
+  '/examples',
+  '/updates',
+  '/pricing',
+  '/docs',
+  '/contact',
+  '/help',
+  '/about',
+  '/blog',
+  '/careers',
+  '/privacy',
+  '/terms',
+  '/cookies',
 ]);
 
 export default clerkMiddleware(async (auth, request) => {

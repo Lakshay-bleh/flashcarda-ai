@@ -85,13 +85,13 @@ export default function Home() {
                 <Link
                   href="/sign-up"
                   className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50"
-                  legacyBehavior>
+                >
                   Start Learning
                 </Link>
                 <Link
                   href="/sign-up"
                   className="ml-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-500 bg-opacity-60 hover:bg-opacity-70"
-                  legacyBehavior>
+                >
                   See How it Works
                 </Link>
               </div>
@@ -198,7 +198,7 @@ export default function Home() {
           <Link
             href="/sign-up"
             className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto"
-            legacyBehavior>
+          >
             Sign up for free
           </Link>
         </div>

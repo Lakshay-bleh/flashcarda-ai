@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Box,
   Typography,
@@ -29,15 +30,8 @@ const navItems = [
   { icon: <Settings />, label: "Settings", href: "/settings" },
 ];
 
-const useCurrentPath = () => {
-  if (typeof window !== "undefined") {
-    return window.location.pathname;
-  }
-  return "/";
-};
-
 const UnifiedSidebar: React.FC = () => {
-  const currentPath = useCurrentPath();
+  const currentPath = usePathname() || "/";
 
   return (
     <Box
@@ -86,19 +80,22 @@ const UnifiedSidebar: React.FC = () => {
       {/* Navigation List */}
       <List sx={{ flexGrow: 1 }}>
         {navItems.map(({ icon, label, href }) => {
-          const isActive = currentPath === href;
+          // Make active also if current path starts with href (for example /decks/123)
+          const isActive = currentPath === href || currentPath.startsWith(href + "/");
+
           return (
-            <Link key={label} href={href} passHref >
+            <Link key={label} href={href} passHref>
               <ListItemButton
                 selected={isActive}
                 sx={{
-                  color: isActive ? "white" : "rgba(255 255 255 / 0.8)",
-                  bgcolor: isActive ? "rgba(255 255 255 / 0.12)" : "transparent",
+                  color: isActive ? "#90caf9" : "rgba(255 255 255 / 0.8)", // brighter blue on active
+                  bgcolor: isActive ? "rgba(144, 202, 249, 0.2)" : "transparent", // stronger blue bg
                   "&:hover": {
                     bgcolor: "rgba(255 255 255 / 0.2)",
                   },
                   mb: 0.5,
                   borderRadius: 1,
+                  transition: "background-color 0.3s, color 0.3s",
                 }}
               >
                 <ListItemIcon sx={{ color: "inherit" }}>{icon}</ListItemIcon>

@@ -56,7 +56,7 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/pricing" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Pricing
                     </Link>
                   </li>
@@ -73,7 +73,7 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/api" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       API Status
                     </Link>
                   </li>
@@ -104,12 +104,12 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/blog" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Blog
                     </Link>
                   </li>
                   <li>
-                    <Link href="/careers" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Careers
                     </Link>
                   </li>
@@ -121,17 +121,17 @@ export default function Footer() {
                 </h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="/privacy" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Privacy Policy
                     </Link>
                   </li>
                   <li>
-                    <Link href="/terms" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Terms of Service
                     </Link>
                   </li>
                   <li>
-                    <Link href="/cookies" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/" className="text-base text-gray-400 hover:text-white">
                       Cookie Policy
                     </Link>
                   </li>
