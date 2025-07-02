@@ -1,3 +1,5 @@
+'use client'
+
 import React from "react";
 import Link from "next/link";
 import {
@@ -90,9 +92,8 @@ const UnifiedSidebar: React.FC = () => {
         {navItems.map(({ icon, label, href }) => {
           const isActive = currentPath === href;
           return (
-            <Link key={label} href={href} passHref legacyBehavior>
+            <Link key={label} href={href} passHref >
               <ListItemButton
-                component="a"
                 selected={isActive}
                 sx={{
                   color: isActive ? "white" : "rgba(255 255 255 / 0.8)",
