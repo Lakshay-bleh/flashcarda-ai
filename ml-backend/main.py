@@ -1,5 +1,6 @@
 # run using uvicorn main:app --reload
 # first use .venv/Scripts/activate
+# main.py
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +12,11 @@ from transformers import (
     AutoModelForQuestionAnswering,
 )
 import spacy
+import spacy.cli
 import re
+
+# Download spaCy model if not present
+spacy.cli.download("en_core_web_sm")
 
 # Setup app
 app = FastAPI()
@@ -24,7 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load spacy for simple noun chunk extraction as answers
+# Load spacy for noun chunk extraction
 nlp = spacy.load("en_core_web_sm")
 
 # Use large QG model
@@ -71,9 +76,9 @@ def generate_flashcards(input: InputText):
         for answer in answers:
             # Highlight answer with <hl> tokens inside the paragraph
             highlighted_text = re.sub(
-                rf'\b{re.escape(answer)}\b', 
-                f'<hl> {answer} <hl>', 
-                paragraph, 
+                rf'\b{re.escape(answer)}\b',
+                f'<hl> {answer} <hl>',
+                paragraph,
                 count=1
             )
             prompt = f"generate question: {highlighted_text}"
