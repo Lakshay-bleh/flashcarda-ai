@@ -23,7 +23,6 @@ export default function Home() {
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
         rel="stylesheet"
       />
-
       <style jsx global>{`
         .gradient-bg {
           background: linear-gradient(135deg, #6B73FF 0%, #000DFF 50%, #00D4FF 100%);
@@ -70,7 +69,6 @@ export default function Home() {
           100% { opacity: 1; transform: translateY(0); }
         }
       `}</style>
-
       {/* Hero */}
       <section className="relative gradient-bg text-white overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,10 +82,16 @@ export default function Home() {
                 Create, study, and master flashcards with our intelligent spaced repetition system.
               </p>
               <div className="mt-6">
-                <Link href="/sign-up" className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50">
+                <Link
+                  href="/sign-up"
+                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50"
+                  legacyBehavior>
                   Start Learning
                 </Link>
-                <Link href="/sign-up" className="ml-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-500 bg-opacity-60 hover:bg-opacity-70">
+                <Link
+                  href="/sign-up"
+                  className="ml-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-500 bg-opacity-60 hover:bg-opacity-70"
+                  legacyBehavior>
                   See How it Works
                 </Link>
               </div>
@@ -116,7 +120,6 @@ export default function Home() {
           </svg>
         </div>
       </section>
-
       {/* Features */}
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -182,7 +185,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* CTA */}
       <section className="bg-indigo-700">
         <div className="max-w-2xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
@@ -193,12 +195,14 @@ export default function Home() {
           <p className="mt-4 text-lg leading-6 text-indigo-200">
             Join thousands of students who are learning more efficiently with our flashcard system.
           </p>
-          <Link href="/sign-up" className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto">
+          <Link
+            href="/sign-up"
+            className="mt-8 w-full inline-flex items-center justify-center px-5 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-indigo-50 sm:w-auto"
+            legacyBehavior>
             Sign up for free
           </Link>
         </div>
       </section>
-
     </div>
   );
 }

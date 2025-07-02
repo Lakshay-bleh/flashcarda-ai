@@ -258,7 +258,7 @@ export default function DashboardPage() {
                   </>
                 ) : (
                   <>
-                    <Link href={`/decks/${deck.id}`} className="block">
+                    <Link href={`/decks/${deck.id}`} className="block" legacyBehavior>
                       <h2 className="text-xl font-semibold text-white mb-1">{deck.name}</h2>
                       {deck.description && (
                         <p className="text-indigo-100">{deck.description}</p>
