@@ -219,15 +219,16 @@ export default function DeckPage() {
             {/* Share Button */}
             <button
               onClick={() => {
-                const slug = encodeURIComponent('flashcards');
-                const shareUrl = `${window.location.origin}/share/${deckId}/${slug}`;
+                const slug = 'flashcards';
+                // Change this URL to match your folder structure route
+                const shareUrl = `${window.location.origin}/decks/${deckId}/share/${slug}`;
                 navigator.clipboard.writeText(shareUrl);
                 toast.success('Deck link copied to clipboard!');
               }}
-              className="px-5 py-3 bg-pink-500 hover:bg-pink-600 rounded-lg font-semibold shadow-md transition"
             >
               🔗 Share
             </button>
+
           </div>
         </header>
 

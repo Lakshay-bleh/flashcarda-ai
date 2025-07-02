@@ -22,47 +22,54 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
 
     const parsed = profileSchema.safeParse(body);
-
     if (!parsed.success) {
       return NextResponse.json(
-        {
-          error: 'Validation failed',
-          fieldErrors: parsed.error.flatten().fieldErrors,
-        },
+        { error: 'Validation failed', fieldErrors: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
-    // Here userId is actually Clerk ID
     const { userId: clerkId, bio, location, imageUrl } = parsed.data;
-
-    // Convert clerkId to internal UUID
     const userId = await getUuidFromExternalId(clerkId);
     if (!userId) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
+    console.log('Updating profile for userId:', userId);
+    console.log('Payload:', { bio, location, imageUrl });
+
+    // Try update first
+    // Declare username and full_name if needed
+    const username = parsed.data.username ?? null;
+    const full_name = parsed.data.full_name ?? null;
+
     const { data, error } = await supabase
       .from('profiles')
       .upsert(
-        {
-          user_id: userId, // use internal UUID here
-          bio,
-          location,
-          image_url: imageUrl,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' } // upsert based on user_id foreign key
+      {
+        user_id: userId,
+        full_name,
+        username,
+        bio,
+        location,
+        image_url: imageUrl,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: 'user_id' }
       )
       .select();
 
+
+    console.log('Update result data:', data);
+    console.log('Update result error:', error);
+
     if (error) {
-      console.error('Supabase upsert error:', error);
+      console.error('Supabase update error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
     if (!data || data.length === 0) {
-      return NextResponse.json({ error: 'No data returned from upsert' }, { status: 500 });
+      return NextResponse.json({ error: 'No profile updated' }, { status: 404 });
     }
 
     return NextResponse.json({
@@ -80,6 +87,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
+
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -93,21 +101,17 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    // Try fetching profile, no error if not found
-    let { data: profile, error } = await supabase
+    // Fetch profile data (including username if stored here)
+    const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('*')
+      .select('bio, location, image_url, updated_at, username, full_name') // include full_name here
       .eq('user_id', userId)
       .maybeSingle();
 
-    
-
-    if (error) {
-      console.error('Supabase error:', error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (profileError) {
+      return NextResponse.json({ error: profileError.message }, { status: 500 });
     }
 
-    // Insert default profile if none exists
     if (!profile) {
       const { data: insertedProfile, error: insertError } = await supabase
         .from('profiles')
@@ -122,22 +126,28 @@ export async function GET(req: Request) {
         .maybeSingle();
 
       if (insertError) {
-        console.error('Error inserting profile:', insertError);
         return NextResponse.json({ error: insertError.message }, { status: 500 });
       }
-
-      profile = insertedProfile;
-      error = insertError;
+      if (!insertedProfile) {
+        return NextResponse.json({ error: 'Failed to insert or retrieve profile' }, { status: 500 });
+      }
+      return NextResponse.json({
+        full_name: insertedProfile.full_name,
+        username: insertedProfile.username,
+        bio: insertedProfile.bio,
+        location: insertedProfile.location,
+        imageUrl: insertedProfile.image_url,
+        updatedAt: insertedProfile.updated_at,
+      });
     }
 
-    if (!profile) {
-      return NextResponse.json({ error: 'Profile not found' }, { status: 404 });
-    }
     return NextResponse.json({
-      bio: profile.bio,
-      location: profile.location,
-      imageUrl: profile.image_url,
-      updatedAt: profile.updated_at,
+      full_name: profile.full_name,
+      username: profile.username,
+      bio: profile.bio ?? '',
+      location: profile.location ?? '',
+      imageUrl: profile.image_url ?? '',
+      updatedAt: profile.updated_at ?? null,
     });
   } catch (error) {
     console.error('Unexpected error:', error);

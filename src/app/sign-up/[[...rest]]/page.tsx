@@ -227,7 +227,7 @@ export default function SignUpPage() {
             routing="path"
             path="/sign-up"
             signInUrl="/sign-in"
-            redirectUrl="/home"
+            redirectUrl="/profile"
             appearance={{
               elements: {
                 card: 'border border-gray-200 px-4 py-6 shadow-md',
