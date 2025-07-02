@@ -33,7 +33,7 @@ app.add_middleware(
 nlp = spacy.load("en_core_web_sm")
 
 # Use large QG model
-qg_model_name = "valhalla/t5-large-qa-qg-hl"
+qg_model_name = "valhalla/t5-base-qa-qg-hl"
 qg_tokenizer = AutoTokenizer.from_pretrained(qg_model_name)
 qg_model = AutoModelForSeq2SeqLM.from_pretrained(qg_model_name)
 qg_pipeline = pipeline("text2text-generation", model=qg_model, tokenizer=qg_tokenizer)

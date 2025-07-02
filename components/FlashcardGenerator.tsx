@@ -26,6 +26,9 @@ function debounce<Args extends unknown[], Return>(
   };
 }
 
+// Use env var for API base URL, fallback to localhost for dev
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8000';
+
 export default function FlashcardGenerator({
   deckId,
   onGenerated,
@@ -51,7 +54,7 @@ export default function FlashcardGenerator({
       setLoading(true);
       setError('');
       try {
-        const res = await fetch('http://localhost:8000/generate', {
+        const res = await fetch(`${API_BASE_URL}/generate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ text: inputText, num_questions: numQ }),
@@ -87,7 +90,7 @@ export default function FlashcardGenerator({
     setError('');
 
     try {
-      const res = await fetch('http://localhost:8000/generate', {
+      const res = await fetch(`${API_BASE_URL}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text, num_questions: numQuestions }),
@@ -172,13 +175,13 @@ export default function FlashcardGenerator({
                 <p className="text-indigo-100 font-semibold mb-1">Q:</p>
                 <div className="text-white">
                   <ReactMarkdown>{fc.question}</ReactMarkdown>
-                </div>   
+                </div>
               </div>
               <div>
                 <p className="text-indigo-100 font-semibold mb-1">A:</p>
                 <div className="text-white">
                   <ReactMarkdown>{fc.answer}</ReactMarkdown>
-                </div>                
+                </div>
               </div>
             </li>
           ))}
