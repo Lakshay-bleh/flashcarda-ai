@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useUser} from '@clerk/nextjs';
+import { useEffect, useState, useCallback } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -16,7 +16,7 @@ type Deck = {
 };
 
 export default function DecksPage() {
-  const { user, isSignedIn } = useUser();
+  const { user, isSignedIn , isLoaded} = useUser();
   const router = useRouter();
 
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -30,12 +30,16 @@ export default function DecksPage() {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
 
+  // Pagination for decks list
+  const [visibleCount, setVisibleCount] = useState(10);
+  const visibleDecks = decks.slice(0, visibleCount);
+
   // Redirect if not signed in
   useEffect(() => {
     if (!isSignedIn) router.push('/sign-in');
   }, [isSignedIn, router]);
 
-  // Fetch appUserId
+  // Fetch appUserId from backend
   useEffect(() => {
     async function initAppUser() {
       if (!user) return;
@@ -51,7 +55,7 @@ export default function DecksPage() {
     initAppUser();
   }, [user]);
 
-  // Fetch decks
+  // Fetch decks once appUserId is available
   useEffect(() => {
     const fetchDecks = async (userId: string) => {
       setLoading(true);
@@ -69,40 +73,10 @@ export default function DecksPage() {
     if (appUserId) fetchDecks(appUserId);
   }, [appUserId]);
 
-  // Update stats on deck click, then navigate
-  async function handleDeckClick(deckId: string) {
-    if (!appUserId || !user) return;
-
-    try {
-      // Send POST request to increment the decks
-      const res = await fetch('/api/user-stats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          clerkUserId: user.id,
-          action: 'decks',
-          count: 1,  // Increment by 1
-        }),
-      });
-
-      if (!res.ok) throw new Error('Failed to update stats');
-
-      // Now update the local state
-      setDecks((prevDecks) => {
-        return prevDecks.map((deck) =>
-          deck.id === deckId
-            ? { ...deck, decks: (deck.decks || 0) + 1 }
-            : deck
-        );
-      });
-    } catch (error) {
-      console.error('Error updating stats:', error);
-      toast.error('Could not update stats');
-    } finally {
-      router.push(`/decks/${deckId}`);
-    }
+  // Increment deck stats and navigate to deck page
+  function handleDeckClick(deckId: string) {
+    router.push(`/decks/${deckId}`);
   }
-
 
   // Start editing deck
   const startEditing = (deck: Deck) => {
@@ -118,7 +92,7 @@ export default function DecksPage() {
     setEditDescription('');
   };
 
-  // Save deck edits
+  // Save edited deck data
   const saveEdit = async (deckId: string) => {
     if (!editName.trim()) {
       toast.error('Name cannot be empty');
@@ -135,8 +109,9 @@ export default function DecksPage() {
         }),
       });
       if (!res.ok) throw new Error('Failed to update deck');
-      setDecks(current =>
-        current.map(d =>
+
+      setDecks((current) =>
+        current.map((d) =>
           d.id === deckId
             ? { ...d, name: editName.trim(), description: editDescription.trim() }
             : d
@@ -151,14 +126,15 @@ export default function DecksPage() {
     }
   };
 
-  // Delete deck
+  // Delete deck with confirmation
   const deleteDeck = async (deckId: string) => {
     if (!confirm('Are you sure you want to delete this deck?')) return;
     setDeleteLoadingId(deckId);
     try {
       const res = await fetch(`/api/decks/${deckId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete deck');
-      setDecks(current => current.filter(d => d.id !== deckId));
+
+      setDecks((current) => current.filter((d) => d.id !== deckId));
       if (editingId === deckId) cancelEditing();
       toast.success('Deck deleted!');
     } catch {
@@ -167,6 +143,43 @@ export default function DecksPage() {
       setDeleteLoadingId(null);
     }
   };
+
+  // Load more decks handler with smooth scroll
+  const handleLoadMore = useCallback(() => {
+    setVisibleCount((count) => {
+      const newCount = Math.min(count + 5, decks.length);
+      // Scroll to last newly loaded deck after slight delay
+      setTimeout(() => {
+        const lastVisibleDeckId = decks[newCount - 1]?.id;
+        if (lastVisibleDeckId) {
+          const el = document.getElementById(`deck-${lastVisibleDeckId}`);
+          el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 100);
+      return newCount;
+    });
+  }, [decks]);
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    // Optionally return null or spinner, or just rely on useEffect redirect
+    return null;
+  }
+
+  if (!appUserId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 text-white">
@@ -192,96 +205,128 @@ export default function DecksPage() {
         </header>
 
         {loading ? (
-          <div className="flex justify-center items-center h-40">
+          <div className="flex justify-center items-center h-40" aria-busy="true" aria-label="Loading decks">
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
           </div>
         ) : decks.length > 0 ? (
-          <ul className="space-y-6">
-            {decks.map(deck => (
-              <motion.li
-                key={deck.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}
-                className="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-xl border border-white/20 hover:shadow-2xl hover:-translate-y-0.5 transition"
-              >
-                {editingId === deck.id ? (
-                  <>
-                    <div className="mb-4">
-                      <label className="block text-indigo-100 font-medium mb-1">Deck Name</label>
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={e => setEditName(e.target.value.slice(0, 100))}
-                        maxLength={100}
-                        disabled={editLoading}
-                        className="w-full p-3 rounded-md border border-white/20 bg-white/20 text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      />
-                    </div>
+          <>
+            <ul className="space-y-6" role="list">
+              {visibleDecks.map((deck) => (
+                <motion.li
+                  id={`deck-${deck.id}`}
+                  key={deck.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-xl border border-white/20 hover:shadow-2xl hover:-translate-y-0.5 transition"
+                >
+                  {editingId === deck.id ? (
+                    <>
+                      <div className="mb-4">
+                        <label htmlFor="edit-name" className="block text-indigo-100 font-medium mb-1">
+                          Deck Name
+                        </label>
+                        <input
+                          id="edit-name"
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value.slice(0, 100))}
+                          maxLength={100}
+                          disabled={editLoading}
+                          className="w-full p-3 rounded-md border border-white/20 bg-white/20 text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                          aria-required="true"
+                          aria-invalid={!editName.trim()}
+                        />
+                      </div>
 
-                    <div className="mb-4">
-                      <label className="block text-indigo-100 font-medium mb-1">Description</label>
-                      <textarea
-                        value={editDescription}
-                        onChange={e => setEditDescription(e.target.value.slice(0, 300))}
-                        maxLength={300}
-                        rows={3}
-                        disabled={editLoading}
-                        className="w-full p-3 rounded-md border border-white/20 bg-white/20 text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      />
-                    </div>
+                      <div className="mb-4">
+                        <label htmlFor="edit-description" className="block text-indigo-100 font-medium mb-1">
+                          Description
+                        </label>
+                        <textarea
+                          id="edit-description"
+                          value={editDescription}
+                          onChange={(e) => setEditDescription(e.target.value.slice(0, 300))}
+                          maxLength={300}
+                          rows={3}
+                          disabled={editLoading}
+                          className="w-full p-3 rounded-md border border-white/20 bg-white/20 text-white focus:outline-none focus:ring-2 focus:ring-pink-400"
+                        />
+                      </div>
 
-                    <div className="flex gap-3 mt-6">
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => saveEdit(deck.id)}
+                          disabled={editLoading}
+                          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition shadow flex-1"
+                          aria-label="Save deck edits"
+                        >
+                          {editLoading ? 'Saving...' : 'Save'}
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          disabled={editLoading}
+                          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition shadow flex-1"
+                          aria-label="Cancel deck edits"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
                       <button
-                        onClick={() => saveEdit(deck.id)}
-                        disabled={editLoading}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition shadow flex-1"
+                        onClick={() => handleDeckClick(deck.id)}
+                        className="block w-full text-left focus:outline-none"
+                        aria-label={`Open deck ${deck.name}`}
                       >
-                        {editLoading ? 'Saving...' : 'Save'}
+                        <h2 className="text-2xl font-semibold text-white mb-1 truncate">{deck.name}</h2>
+                        {deck.description && (
+                          <p className="text-indigo-100 text-sm line-clamp-2">{deck.description}</p>
+                        )}
                       </button>
-                      <button
-                        onClick={cancelEditing}
-                        disabled={editLoading}
-                        className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition shadow flex-1"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <button
-                      onClick={() => handleDeckClick(deck.id)}
-                      className="block w-full text-left focus:outline-none"
-                    >
-                      <h2 className="text-2xl font-semibold text-white mb-1 truncate">
-                        {deck.name}
-                      </h2>
-                      {deck.description && (
-                        <p className="text-indigo-100 text-sm line-clamp-2">{deck.description}</p>
-                      )}
-                    </button>
 
-                    <div className="flex gap-3 mt-6">
-                      <button
-                        onClick={() => startEditing(deck)}
-                        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-1"
-                      >
-                        ✏️ Edit
-                      </button>
-                      <button
-                        onClick={() => deleteDeck(deck.id)}
-                        disabled={deleteLoadingId === deck.id}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-1"
-                      >
-                        {deleteLoadingId === deck.id ? 'Deleting…' : '🗑️ Delete'}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </motion.li>
-            ))}
-          </ul>
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => startEditing(deck)}
+                          className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-1"
+                          aria-label={`Edit deck ${deck.name}`}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => deleteDeck(deck.id)}
+                          disabled={deleteLoadingId === deck.id}
+                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-1"
+                          aria-label={`Delete deck ${deck.name}`}
+                        >
+                          {deleteLoadingId === deck.id ? 'Deleting…' : '🗑️ Delete'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </motion.li>
+              ))}
+            </ul>
+
+            {/* Load More button */}
+            {visibleCount < decks.length ? (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={handleLoadMore}
+                  className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-md shadow-md transition"
+                  aria-label="Load more decks"
+                  disabled={loading}
+                >
+                  Load More
+                </button>
+              </div>
+            ) : (
+              <p className="text-center text-indigo-100 mt-8 text-sm italic">
+                You have loaded all decks.
+              </p>
+            )}
+          </>
         ) : (
           <p className="text-center text-indigo-100 mt-16 text-lg">
             You don’t have any decks yet. Start by creating one on your Dashboard!

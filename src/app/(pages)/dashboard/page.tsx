@@ -16,7 +16,7 @@ type Deck = {
 };
 
 export default function DashboardPage() {
-  const { user, isSignedIn } = useUser();
+  const { user, isSignedIn, isLoaded } = useUser();
   const router = useRouter();
 
   const [decks, setDecks] = useState<Deck[]>([]);
@@ -31,10 +31,13 @@ export default function DashboardPage() {
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
 
+  const [visibleCount, setVisibleCount] = useState(2);
+
   // Redirect if not signed in
   useEffect(() => {
+    if (!isLoaded) return; // Wait for auth state to load
     if (!isSignedIn) router.push('/sign-in');
-  }, [isSignedIn, router]);
+  }, [isSignedIn, isLoaded, router]);
 
   // Sync user and get internal app user ID
   useEffect(() => {
@@ -153,6 +156,34 @@ export default function DashboardPage() {
     }
   };
 
+  useEffect(() => {
+    setVisibleCount(2);
+  }, [decks]);
+
+  const loadMore = () => {
+    setVisibleCount(prev => prev + 2);
+  };
+
+    if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    // Optionally return null or spinner, or just rely on useEffect redirect
+    return null;
+  }
+
+  if (!appUserId) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen flex bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 text-white font-sans transition-colors">
       <Sidebar />
@@ -206,86 +237,100 @@ export default function DashboardPage() {
             <div className="animate-spin rounded-full h-12 w-12 border-4 border-white border-t-transparent" />
           </div>
         ) : decks.length ? (
-          <ul className="space-y-6">
-            {decks.map(deck => (
-              <motion.li
-                key={deck.id}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}
-                className="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-xl border border-white/20 transition hover:-translate-y-0.5 hover:shadow-2xl"
-              >
-                {editingId === deck.id ? (
-                  <>
-                    <div className="mb-4">
-                      <label className="text-sm font-medium block text-indigo-100 mb-1">Edit Deck Name</label>
-                      <input
-                        value={editName}
-                        onChange={e => setEditName(e.target.value.slice(0, 100))}
-                        maxLength={100}
-                        disabled={editLoading}
-                        className="w-full p-3 rounded-md border border-white/20 bg-white/20 text-white"
-                      />
-                    </div>
-                                      <div className="mb-4">
-                      <label className="text-sm font-medium block text-indigo-100 mb-1">Edit Description</label>
-                      <textarea
-                        value={editDescription}
-                        onChange={e => setEditDescription(e.target.value.slice(0, 300))}
-                        rows={3}
-                        maxLength={300}
-                        disabled={editLoading}
-                        className="w-full p-3 rounded-md border border-white/20 bg-white/20 text-white"
-                      />
-                    </div>
-
-                    <div className="flex gap-3 mt-6">
-                      <button
-                        onClick={() => saveEdit(deck.id)}
-                        disabled={editLoading}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition shadow"
-                      >
-                        💾 Save
-                      </button>
-                      <button
-                        onClick={cancelEditing}
-                        disabled={editLoading}
-                        className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition shadow"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Link href={`/decks/${deck.id}`}>
-                      <div className="block cursor-pointer">
-                        <h2 className="text-xl font-semibold text-white mb-1">{deck.name}</h2>
-                        {deck.description && (
-                          <p className="text-indigo-100">{deck.description}</p>
-                        )}
+          <>
+            <ul className="space-y-6">
+              {decks.slice(0, visibleCount).map(deck => (
+                <motion.li
+                  key={deck.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="bg-white/10 backdrop-blur-md p-6 rounded-xl shadow-xl border border-white/20 transition hover:-translate-y-0.5 hover:shadow-2xl"
+                >
+                  {editingId === deck.id ? (
+                    <>
+                      <div className="mb-4">
+                        <label className="text-sm font-medium block text-indigo-100 mb-1">Edit Deck Name</label>
+                        <input
+                          value={editName}
+                          onChange={e => setEditName(e.target.value.slice(0, 100))}
+                          maxLength={100}
+                          disabled={editLoading}
+                          className="w-full p-3 rounded-md border border-white/20 bg-white/20 text-white"
+                        />
                       </div>
-                    </Link>
-                    <div className="flex gap-3 mt-6">
-                      <button
-                        onClick={() => startEditing(deck)}
-                        className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-1"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteDeck(deck.id)}
-                        disabled={deleteLoadingId === deck.id}
-                        className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-1"
-                      >
-                        {deleteLoadingId === deck.id ? 'Deleting...' : 'Delete'}
-                      </button>
-                    </div>
-                  </>
-                )}
-              </motion.li>
-            ))}
-          </ul>
+                      <div className="mb-4">
+                        <label className="text-sm font-medium block text-indigo-100 mb-1">Edit Description</label>
+                        <textarea
+                          value={editDescription}
+                          onChange={e => setEditDescription(e.target.value.slice(0, 300))}
+                          rows={3}
+                          maxLength={300}
+                          disabled={editLoading}
+                          className="w-full p-3 rounded-md border border-white/20 bg-white/20 text-white"
+                        />
+                      </div>
+
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => saveEdit(deck.id)}
+                          disabled={editLoading}
+                          className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md transition shadow"
+                        >
+                          💾 Save
+                        </button>
+                        <button
+                          onClick={cancelEditing}
+                          disabled={editLoading}
+                          className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md transition shadow"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Link href={`/decks/${deck.id}`}>
+                        <div className="block cursor-pointer">
+                          <h2 className="text-xl font-semibold text-white mb-1">{deck.name}</h2>
+                          {deck.description && (
+                            <p className="text-indigo-100">{deck.description}</p>
+                          )}
+                        </div>
+                      </Link>
+                      <div className="flex gap-3 mt-6">
+                        <button
+                          onClick={() => startEditing(deck)}
+                          className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-1"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => deleteDeck(deck.id)}
+                          disabled={deleteLoadingId === deck.id}
+                          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-1"
+                        >
+                          {deleteLoadingId === deck.id ? 'Deleting...' : 'Delete'}
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </motion.li>
+              ))}
+            </ul>
+
+            {/* Load More Button */}
+            {visibleCount < decks.length && (
+              <div className="flex justify-center mt-8">
+                <button
+                  onClick={loadMore}
+                  className="bg-pink-500 hover:bg-pink-600 text-white py-3 px-8 rounded-lg font-medium transition shadow-md hover:shadow-xl"
+                >
+                  Load More
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <p className="text-center text-indigo-100">
             You don’t have any decks yet. Create your first one!
