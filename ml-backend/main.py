@@ -1,6 +1,6 @@
-# run using uvicorn main:app --reload
-# first use .venv/Scripts/activate
-# main.py
+#python -m venv venv
+#.venv/Scripts/activate
+#uvicorn main:app --reload
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

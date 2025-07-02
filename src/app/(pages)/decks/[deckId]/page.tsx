@@ -35,26 +35,32 @@ export default function DeckPage() {
   const [adding, setAdding] = useState(false);
   const [deckName, setDeckName] = useState<string>('');
 
-  useEffect(() => {
-  if (!user?.id) return;
-
-  const fetchStats = async () => {
-    try {
-      // Then fetch user stats using appUserId
-      const resStats = await fetch(`/api/stats/user?userId=${user.id}`);
-      const statsJson = await resStats.json();
-
-      if (statsJson.success) {
-        console.log('Fetched user stats:', statsJson.stats);
-      } else {
-        console.error('Failed to fetch stats:', statsJson.error);
-      }
-    } catch (err) {
-      console.error('Error fetching stats:', err);
+  const fetchFlashcards = async () => {
+    if (!deckId) {
+      toast.error('Invalid deck ID');
+      setIsLoading(false);
+      return;
     }
+    setIsLoading(true);
+    const { data, error } = await supabase
+      .from('flashcards')
+      .select('*')
+      .eq('deck_id', deckId as string)
+      .order('id', { ascending: false });
+
+    if (error) {
+      toast.error('Failed to fetch flashcards');
+    } else {
+      setFlashcards(
+        (data || []).map(card => ({
+          id: card.id,
+          question: card.question ?? '',
+          answer: card.answer ?? '',
+        }))
+      );
+    }
+    setIsLoading(false);
   };
-    fetchStats();
-  }, [user]);
 
   useEffect(() => {
     if (!deckId) {
@@ -235,15 +241,7 @@ export default function DeckPage() {
         {/* Flashcard Generator */}
         <FlashcardGenerator
           deckId={deckId}
-          onGenerated={() => {
-            setIsLoading(true);
-            // refresh flashcards after generation (replace with your fetching logic)
-            fetch(`/api/flashcards?deckId=${deckId}`)
-              .then(res => res.json())
-              .then(data => setFlashcards(data || []))
-              .catch(() => toast.error('Failed to fetch flashcards'))
-              .finally(() => setIsLoading(false));
-          }}
+          onGenerated={fetchFlashcards}
         />
 
         {/* Add Flashcard Form */}
