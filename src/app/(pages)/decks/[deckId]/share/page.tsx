@@ -3,14 +3,14 @@ import { supabase } from "../../../../../lib/supabase";
 import ReactMarkdown from "react-markdown";
 
 type Props = {
-  params: {
+  params: Promise<{
     deckId: string;
     slug: string;
-  };
+  }>;
 };
 
 export default async function SharedDeckPage({ params }: Props) {
-  const { deckId } = (await Promise.resolve(params));
+  const { deckId } = await params;
 
   // Fetch deck
   const { data: deck, error: deckError } = await supabase

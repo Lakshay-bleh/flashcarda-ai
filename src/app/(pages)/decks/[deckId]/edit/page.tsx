@@ -8,7 +8,10 @@ import { toast } from 'sonner';
 export default function EditDeckPage() {
   const params = useParams();
   const router = useRouter();
-  const deckId = params?.deckId;
+
+  // Normalize deckId to string or undefined
+  let deckId = params?.deckId;
+  if (Array.isArray(deckId)) deckId = deckId[0];
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -17,6 +20,7 @@ export default function EditDeckPage() {
 
   useEffect(() => {
     if (!deckId) return;
+
     const fetchDeck = async () => {
       setLoading(true);
       const { data, error } = await supabase
@@ -43,6 +47,8 @@ export default function EditDeckPage() {
       toast.error('Name is required');
       return;
     }
+    if (!deckId) return;
+
     setSaving(true);
 
     const { error } = await supabase
@@ -63,6 +69,14 @@ export default function EditDeckPage() {
     return (
       <div className="min-h-screen flex justify-center items-center">
         <p>Loading...</p>
+      </div>
+    );
+  }
+
+  if (!deckId) {
+    return (
+      <div className="min-h-screen flex justify-center items-center">
+        <p>Invalid deck ID.</p>
       </div>
     );
   }
