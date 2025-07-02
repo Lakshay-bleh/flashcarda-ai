@@ -43,10 +43,13 @@ const UnifiedSidebar: React.FC = () => {
     <Box
       component="nav"
       sx={{
+        position: "sticky",
+        top: 0,
+        height: "100vh",
+        overflowY: "auto",
         width: { xs: "100%", sm: 280 },
         bgcolor: "rgba(255 255 255 / 0.05)",
         backdropFilter: "blur(12px)",
-        height: "100vh",
         px: 3,
         py: 6,
         borderRight: "1px solid rgba(255 255 255 / 0.15)",
@@ -65,27 +68,20 @@ const UnifiedSidebar: React.FC = () => {
           userSelect: "none",
         }}
       >
-        <Box
-          sx={{
-            bgcolor: "primary.main",
-            width: 40,
-            height: 40,
-            borderRadius: "50%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontWeight: "bold",
-            fontSize: "1.25rem",
-            boxShadow: 1,
-            color: "white",
-          }}
+        <svg
+          className="h-9 w-9 text-indigo-600"
+          fill="currentColor"
+          viewBox="0 0 20 20"
         >
-          F
-        </Box>
+          <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
+          <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+        </svg>
         <Typography variant="h6" fontWeight="bold" letterSpacing={1}>
           FlashDecks
         </Typography>
       </Box>
+
+      <Divider sx={{ borderColor: "rgba(255 255 255 / 0.2)" }} />
 
       {/* Navigation List */}
       <List sx={{ flexGrow: 1 }}>

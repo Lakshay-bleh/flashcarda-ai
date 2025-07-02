@@ -19,6 +19,12 @@
   }
 }
 
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: calc(100vh);
+}
+
 .flashcard {
   perspective: 1000px;
 }
