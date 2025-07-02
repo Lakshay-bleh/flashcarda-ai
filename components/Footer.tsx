@@ -2,11 +2,12 @@
 import React from 'react';
 import Link from 'next/link';
 
-export default function Footer(){
+export default function Footer() {
   return (
     <footer className="bg-gray-800">
       <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+          {/* Brand + tagline */}
           <div className="space-y-8 xl:col-span-1">
             <div className="flex items-center">
               <svg
@@ -30,7 +31,9 @@ export default function Footer(){
             </p>
           </div>
 
+          {/* Links */}
           <div className="mt-12 grid grid-cols-2 gap-8 xl:mt-0 xl:col-span-2">
+            {/* Product + Resources */}
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">
@@ -52,6 +55,11 @@ export default function Footer(){
                       Updates
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/pricing" className="text-base text-gray-400 hover:text-white">
+                      Pricing
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">
@@ -61,7 +69,7 @@ export default function Footer(){
                 <ul className="mt-4 space-y-4">
                   <li>
                     <Link href="/docs" className="text-base text-gray-400 hover:text-white">
-                      Documents
+                      Documentation
                     </Link>
                   </li>
                   <li>
@@ -74,10 +82,16 @@ export default function Footer(){
                       Contact
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/help" className="text-base text-gray-400 hover:text-white">
+                      Help & FAQs
+                    </Link>
+                  </li>
                 </ul>
               </div>
             </div>
 
+            {/* Company + Legal */}
             <div className="md:grid md:grid-cols-2 md:gap-8">
               <div>
                 <h3 className="text-sm font-semibold text-gray-300 tracking-wider uppercase">
@@ -90,12 +104,12 @@ export default function Footer(){
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/blog" className="text-base text-gray-400 hover:text-white">
                       Blog
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/careers" className="text-base text-gray-400 hover:text-white">
                       Careers
                     </Link>
                   </li>
@@ -107,17 +121,17 @@ export default function Footer(){
                 </h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
-                      Privacy
+                    <Link href="/privacy" className="text-base text-gray-400 hover:text-white">
+                      Privacy Policy
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
-                      Terms
+                    <Link href="/terms" className="text-base text-gray-400 hover:text-white">
+                      Terms of Service
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/cookies" className="text-base text-gray-400 hover:text-white">
                       Cookie Policy
                     </Link>
                   </li>
@@ -127,6 +141,7 @@ export default function Footer(){
           </div>
         </div>
 
+        {/* Copyright */}
         <div className="mt-12 border-t border-gray-700 pt-8">
           <p className="text-base text-gray-400 text-center">
             &copy; 2025 FlashDecks. All rights reserved.
@@ -135,4 +150,4 @@ export default function Footer(){
       </div>
     </footer>
   );
-};
+}
