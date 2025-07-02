@@ -2,8 +2,9 @@
 
 import { useUser, useAuth } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import {
   Box,
   Button,
@@ -18,10 +19,17 @@ import {
   ListItemText,
   Paper,
 } from '@mui/material';
-import { Dashboard, School, Info, Lightbulb, Article } from '@mui/icons-material';
 
-// Import your Sidebar from wherever you keep it
-import Sidebar from '../../../../components/Sidebar';  // Adjust this import path as needed
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import SchoolIcon from '@mui/icons-material/School';
+import InfoIcon from '@mui/icons-material/Info';
+import LightbulbIcon from '@mui/icons-material/Lightbulb';
+import ArticleIcon from '@mui/icons-material/Article';
+
+const Sidebar = dynamic(() => import('../../../../components/Sidebar'), {
+  ssr: false,
+  loading: () => <CircularProgress sx={{ color: 'white' }} />,
+});
 
 const motivationalQuotes: string[] = [
   'The journey of a thousand miles begins with one step. – Lao Tzu',
@@ -40,12 +48,11 @@ const studyTips: string[] = [
   'Organize your materials before you start.',
 ];
 
-// Replacing recent articles with "Quick Facts" for better engagement
 const quickFacts = [
-  { icon: <Lightbulb />, text: 'Active recall is proven to improve memory retention.' },
-  { icon: <Lightbulb />, text: 'Spacing out study sessions helps long-term learning.' },
-  { icon: <Lightbulb />, text: 'Teaching others is one of the best ways to master a topic.' },
-  { icon: <Lightbulb />, text: 'Consistency beats intensity for sustained progress.' },
+  { icon: <LightbulbIcon />, text: 'Active recall is proven to improve memory retention.' },
+  { icon: <LightbulbIcon />, text: 'Spacing out study sessions helps long-term learning.' },
+  { icon: <LightbulbIcon />, text: 'Teaching others is one of the best ways to master a topic.' },
+  { icon: <LightbulbIcon />, text: 'Consistency beats intensity for sustained progress.' },
 ];
 
 const HomeAfterLogin: React.FC = () => {
@@ -54,16 +61,20 @@ const HomeAfterLogin: React.FC = () => {
   const router = useRouter();
   const [quote, setQuote] = useState<string>(motivationalQuotes[0]);
 
+  const getRandomQuote = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
+    setQuote(motivationalQuotes[randomIndex]);
+  }, []);
+
   useEffect(() => {
     if (!isLoaded) return;
 
     if (!isSignedIn) {
       router.push('/sign-in');
     } else {
-      const randomIndex = Math.floor(Math.random() * motivationalQuotes.length);
-      setQuote(motivationalQuotes[randomIndex]);
+      getRandomQuote();
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoaded, isSignedIn, router, getRandomQuote]);
 
   if (!isLoaded) {
     return (
@@ -96,21 +107,14 @@ const HomeAfterLogin: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           gap: 5,
-          maxWidth: '100%',
           mx: 'auto',
           width: '100%',
         }}
       >
-        {/* Welcome & Quote */}
         <Box sx={{ mb: 4, maxWidth: 800, mx: 'auto', textAlign: 'center' }}>
-          <Typography
-            variant="h2"
-            component="h1"
-            sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}
-          >
+          <Typography variant="h2" component="h1" sx={{ fontWeight: 700, mb: 1, textShadow: '0 2px 8px rgba(0,0,0,0.6)' }}>
             Welcome back, {user?.firstName || 'User'}! 👋
           </Typography>
-
           <Typography
             variant="h5"
             sx={{
@@ -133,67 +137,60 @@ const HomeAfterLogin: React.FC = () => {
           justifyContent="center"
           sx={{ width: '100%', maxWidth: 600, mx: 'auto' }}
         >
-          <Link href="/dashboard" passHref legacyBehavior>
-            <Button
-              component="a"
-              variant="contained"
-              startIcon={<Dashboard />}
-              sx={{
-                py: 1.8,
-                fontSize: 18,
-                fontWeight: 700,
-                borderRadius: 30,
-                flexGrow: 1,
-                textTransform: 'none',
-                bgcolor: 'rgba(255 255 255 / 0.25)',
-                color: 'white',
-                backdropFilter: 'blur(8px)',
-                boxShadow: '0 6px 20px rgba(255, 255, 255, 0.3)',
-                '&:hover': {
-                  bgcolor: 'rgba(255 255 255 / 0.4)',
-                },
-              }}
-            >
-              Go to Dashboard
-            </Button>
-          </Link>
+          <Button
+            component={Link}
+            href="/dashboard"
+            variant="contained"
+            startIcon={<DashboardIcon />}
+            sx={{
+              py: 1.8,
+              fontSize: 18,
+              fontWeight: 700,
+              borderRadius: 30,
+              flexGrow: 1,
+              textTransform: 'none',
+              bgcolor: 'rgba(255 255 255 / 0.25)',
+              color: 'white',
+              backdropFilter: { xs: 'none', sm: 'blur(8px)' },
+              boxShadow: '0 6px 20px rgba(255, 255, 255, 0.3)',
+              '&:hover': {
+                bgcolor: 'rgba(255 255 255 / 0.4)',
+              },
+            }}
+          >
+            Go to Dashboard
+          </Button>
 
-          <Link href="/decks" passHref legacyBehavior>
-            <Button
-              component="a"
-              variant="outlined"
-              startIcon={<School />}
-              sx={{
-                py: 1.8,
-                fontSize: 18,
-                fontWeight: 700,
-                borderRadius: 30,
-                flexGrow: 1,
-                textTransform: 'none',
-                borderColor: 'rgba(255 255 255 / 0.5)',
-                color: 'rgba(255 255 255 / 0.9)',
-                backdropFilter: 'blur(8px)',
-                '&:hover': {
-                  bgcolor: 'rgba(255 255 255 / 0.2)',
-                  borderColor: 'rgba(255 255 255 / 0.8)',
-                },
-              }}
-            >
-              View My Decks
-            </Button>
-          </Link>
+          <Button
+            component={Link}
+            href="/decks"
+            variant="outlined"
+            startIcon={<SchoolIcon />}
+            sx={{
+              py: 1.8,
+              fontSize: 18,
+              fontWeight: 700,
+              borderRadius: 30,
+              flexGrow: 1,
+              textTransform: 'none',
+              borderColor: 'rgba(255 255 255 / 0.5)',
+              color: 'rgba(255 255 255 / 0.9)',
+              backdropFilter: { xs: 'none', sm: 'blur(8px)' },
+              '&:hover': {
+                bgcolor: 'rgba(255 255 255 / 0.2)',
+                borderColor: 'rgba(255 255 255 / 0.8)',
+              },
+            }}
+          >
+            View My Decks
+          </Button>
         </Stack>
+
 
         <Divider sx={{ borderColor: 'rgba(255 255 255 / 0.3)', my: 4 }} />
 
-        <Box
-          sx={{
-            maxWidth: 900,
-            mx: 'auto',
-            mb: 8,
-            mt: 4,
-          }}
-        >
+        {/* Study Tips */}
+        <Box sx={{ maxWidth: 900, mx: 'auto', mb: 8, mt: 4 }}>
           <Typography
             variant="h4"
             sx={{
@@ -207,11 +204,10 @@ const HomeAfterLogin: React.FC = () => {
               justifyContent: 'center',
             }}
           >
-            <Lightbulb fontSize="large" sx={{ color: 'white' }} />
+            <LightbulbIcon fontSize="large" sx={{ color: 'white' }} />
             Study Tips
           </Typography>
 
-          {/* Replace Grid with Box flex container */}
           <Box
             sx={{
               display: 'flex',
@@ -224,7 +220,7 @@ const HomeAfterLogin: React.FC = () => {
               <Box
                 key={idx}
                 sx={{
-                  flex: '1 1 45%', // similar to xs=12 sm=6
+                  flex: '1 1 45%',
                   maxWidth: 400,
                   display: 'flex',
                   justifyContent: idx % 2 === 0 ? 'flex-start' : 'flex-end',
@@ -235,20 +231,17 @@ const HomeAfterLogin: React.FC = () => {
                   sx={{
                     p: 2,
                     bgcolor: 'rgba(255 255 255 / 0.15)',
-                    backdropFilter: 'blur(10px)',
+                    backdropFilter: { xs: 'none', sm: 'blur(10px)' },
                     borderRadius: 3,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
-                    userSelect: 'text',
-                    cursor: 'default',
-                    transition: 'background-color 0.3s ease',
-                    '&:hover': { bgcolor: 'rgba(255 255 255 / 0.25)' },
                     width: '100%',
+                    '&:hover': { bgcolor: 'rgba(255 255 255 / 0.25)' },
                   }}
                 >
-                  <Info sx={{ color: 'white', fontSize: 30 }} />
-                  <Typography variant="body1" sx={{ flex: 1, fontWeight: 600, color: '#fff' }}>
+                  <InfoIcon sx={{ color: 'white', fontSize: 30 }} />
+                  <Typography variant="body1" sx={{ fontWeight: 600, color: '#fff' }}>
                     {tip}
                   </Typography>
                 </Paper>
@@ -274,7 +267,7 @@ const HomeAfterLogin: React.FC = () => {
               justifyContent: 'center',
             }}
           >
-            <Article fontSize="large" />
+            <ArticleIcon fontSize="large" />
             Quick Facts
           </Typography>
 
