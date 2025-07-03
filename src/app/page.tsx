@@ -81,20 +81,22 @@ export default function Home() {
               <p className="mt-4 text-lg leading-6 text-indigo-100">
                 Create, study, and master flashcards with our intelligent spaced repetition system.
               </p>
-              <div className="mt-6">
-                <Link
-                  href="/sign-up"
-                  className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-50"
-                >
-                  Start Learning
-                </Link>
-                <Link
-                  href="/sign-up"
-                  className="ml-4 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-500 bg-opacity-60 hover:bg-opacity-70"
-                >
-                  See How it Works
-                </Link>
-              </div>
+             <div className="mt-6 flex gap-4">
+              <Link
+                href="/sign-up"
+                className="flex-1 max-w-[200px] text-center px-6 py-3 text-base font-medium rounded-md text-indigo-600 bg-white hover:bg-gray-100 border border-transparent transition-all leading-snug"
+              >
+                <span className="block sm:inline">Start</span>{' '}
+                <span className="block sm:inline">Learning</span>
+              </Link>
+
+              <Link
+                href="/sign-up"
+                className="flex-1 max-w-[200px] text-center px-6 py-3 text-base font-medium rounded-md text-white bg-indigo-500 hover:bg-indigo-600 border border-transparent transition-all leading-snug"
+              >
+                See How it Works
+              </Link>
+             </div>
             </div>
           </div>
         </div>
