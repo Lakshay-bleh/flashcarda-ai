@@ -1,24 +1,15 @@
-#python -m venv venv
-#.venv/Scripts/activate
-#uvicorn main:app --reload
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from transformers import (
-    AutoTokenizer,
-    AutoModelForSeq2SeqLM,
-    pipeline,
-    AutoModelForQuestionAnswering,
-)
+from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForQuestionAnswering
 import spacy
 import spacy.cli
 import re
+from functools import lru_cache
 
 # Download spaCy model if not present
 spacy.cli.download("en_core_web_sm")
 
-# Setup app
 app = FastAPI()
 
 app.add_middleware(
@@ -29,28 +20,28 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load spacy for noun chunk extraction
+# Load spaCy model globally (small)
 nlp = spacy.load("en_core_web_sm")
 
-# Use large QG model
-qg_model_name = "valhalla/t5-base-qa-qg-hl"
-qg_tokenizer = AutoTokenizer.from_pretrained(qg_model_name)
-qg_model = AutoModelForSeq2SeqLM.from_pretrained(qg_model_name)
-qg_pipeline = pipeline("text2text-generation", model=qg_model, tokenizer=qg_tokenizer)
+@lru_cache()
+def get_qg_pipeline():
+    model_name = "valhalla/t5-small-qa-qg-hl"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    return pipeline("text2text-generation", model=model, tokenizer=tokenizer)
 
-# Use DeBERTa v3 large QA model
-qa_model_name = "deepset/deberta-v3-large-squad2"
-qa_tokenizer = AutoTokenizer.from_pretrained(qa_model_name)
-qa_model = AutoModelForQuestionAnswering.from_pretrained(qa_model_name)
-qa_pipeline = pipeline("question-answering", model=qa_model, tokenizer=qa_tokenizer)
+@lru_cache()
+def get_qa_pipeline():
+    model_name = "distilbert-base-cased-distilled-squad"
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+    return pipeline("question-answering", model=model, tokenizer=tokenizer)
 
-# Request schema
 class InputText(BaseModel):
     text: str
-    num_questions: int = 5
+    num_questions: int = 3  # default reduced for memory
 
 def extract_answers(text, max_answers=10):
-    """Extract candidate answers (noun chunks) to highlight."""
     doc = nlp(text)
     answers = []
     for chunk in doc.noun_chunks:
@@ -70,11 +61,13 @@ def generate_flashcards(input: InputText):
         return {"flashcards": []}
 
     try:
+        qg_pipeline = get_qg_pipeline()
+        qa_pipeline = get_qa_pipeline()
+
         answers = extract_answers(paragraph, max_answers=num)
         flashcards = []
 
         for answer in answers:
-            # Highlight answer with <hl> tokens inside the paragraph
             highlighted_text = re.sub(
                 rf'\b{re.escape(answer)}\b',
                 f'<hl> {answer} <hl>',
@@ -94,7 +87,6 @@ def generate_flashcards(input: InputText):
             if not question.endswith("?"):
                 question += "?"
 
-            # Use QA model to find answer from context for the generated question
             try:
                 answer_obj = qa_pipeline(question=question, context=paragraph)
                 answer_text = answer_obj.get("answer", "").strip() or answer
