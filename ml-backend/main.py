@@ -6,6 +6,7 @@ import spacy
 import spacy.cli
 import re
 from functools import lru_cache
+import torch
 
 # Download spaCy model if not present
 spacy.cli.download("en_core_web_sm")
@@ -27,14 +28,22 @@ nlp = spacy.load("en_core_web_sm")
 def get_qg_pipeline():
     model_name = "valhalla/t5-small-qa-qg-hl"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+    # Try loading with fp16 if possible (reduce memory usage)
+    try:
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, torch_dtype=torch.float16)
+    except Exception:
+        # fallback to default if fp16 not supported
+        model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
     return pipeline("text2text-generation", model=model, tokenizer=tokenizer)
 
 @lru_cache()
 def get_qa_pipeline():
     model_name = "distilbert-base-cased-distilled-squad"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+    try:
+        model = AutoModelForQuestionAnswering.from_pretrained(model_name, torch_dtype=torch.float16)
+    except Exception:
+        model = AutoModelForQuestionAnswering.from_pretrained(model_name)
     return pipeline("question-answering", model=model, tokenizer=tokenizer)
 
 class InputText(BaseModel):
@@ -55,7 +64,7 @@ def extract_answers(text, max_answers=10):
 @app.post("/generate")
 def generate_flashcards(input: InputText):
     paragraph = input.text.strip()
-    num = input.num_questions
+    num = min(input.num_questions, 5)  # cap max questions to 5 for memory
 
     if not paragraph:
         return {"flashcards": []}
