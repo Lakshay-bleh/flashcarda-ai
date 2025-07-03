@@ -10,6 +10,7 @@ import { supabase } from '../../../../../lib/supabase';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import Sidebar from '../../../../../../components/Sidebar'; // Uncomment if you have Sidebar
 
 type Flashcard = {
@@ -30,6 +31,8 @@ export default function FlashcardReviewPage({ params }: { params: { deckId: stri
   const [editAnswer, setEditAnswer] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const router = useRouter();
 
   useEffect(() => {
     if (!deckId) {
@@ -150,8 +153,23 @@ export default function FlashcardReviewPage({ params }: { params: { deckId: stri
       <Sidebar /> 
 
       <main className="flex-grow flex flex-col py-12 px-8 sm:px-12 lg:px-16 overflow-auto">
-        <header className="mb-12 border-b border-white/20 pb-6">
-          <h1 className="text-4xl font-extrabold tracking-tight drop-shadow-md">Flashcards Review</h1>
+        {/* Header */}
+        <header className="flex justify-between items-center mb-12 border-b border-white/20 pb-6">
+          <h1 className="text-4xl font-extrabold tracking-tight drop-shadow-md">
+            Flashcards Review
+          </h1>
+
+          <div className="flex gap-4 items-center">
+
+            {/* Start Studying Button */}
+            <button
+              onClick={() => router.push(`/decks/${deckId}/study`)}
+              className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold shadow-md transition"
+            >
+              Enter Study Mode
+            </button>
+
+          </div>
         </header>
 
         {flashcards.length === 0 ? (

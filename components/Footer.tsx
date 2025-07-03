@@ -142,9 +142,12 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-12 border-t border-gray-700 pt-8">
-          <p className="text-base text-gray-400 text-center">
+        <div className="mt-12 border-t border-gray-700 pt-8 text-center">
+          <p className="text-base text-gray-400">
             &copy; 2025 FlashDecks. All rights reserved.
+          </p>
+          <p className="text-sm text-indigo-400 mt-2 italic">
+            Built with love for Riya 💜
           </p>
         </div>
       </div>

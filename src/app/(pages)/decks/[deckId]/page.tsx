@@ -174,14 +174,6 @@ export default function DeckPage() {
               View Flashcards
             </button>
 
-            {/* Start Studying Button */}
-            <button
-              onClick={() => router.push(`/decks/${deckId}/study`)}
-              className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold shadow-md transition"
-            >
-              Start Studying
-            </button>
-
             {/* Share Button */}
             <button
               onClick={() => {

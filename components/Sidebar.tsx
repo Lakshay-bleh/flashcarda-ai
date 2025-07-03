@@ -116,7 +116,7 @@ const UnifiedSidebar: React.FC = () => {
           fontStyle: "italic",
         }}
       >
-        Your daily dose of motivation & learning!
+        For the love of my life..
       </Typography>
     </Box>
   );
