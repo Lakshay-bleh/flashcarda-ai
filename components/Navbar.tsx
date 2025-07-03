@@ -78,6 +78,14 @@ export default function Navbar() {
               Home
             </Link>
 
+            {/* Pricing Link - Always Visible */}
+            <Link
+              href="/pricing"
+              className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+            >
+              Pricing
+            </Link>
+
             {/* Conditional Navigation */}
             {isSignedIn ? (
               <>
@@ -86,12 +94,6 @@ export default function Navbar() {
                   className="text-gray-500 hover:text-gray-700 text-sm font-medium"
                 >
                   Dashboard
-                </Link>
-                <Link
-                  href="/analytics"
-                  className="text-gray-500 hover:text-gray-700 text-sm font-medium"
-                >
-                  Analytics
                 </Link>
                 <Link
                   href="/help"

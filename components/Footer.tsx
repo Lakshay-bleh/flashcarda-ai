@@ -19,7 +19,7 @@ export default function Footer() {
                 <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
               </svg>
               <button
-                onClick={() => (window.location.href = "/#")}
+                onClick={() => (window.location.href = "/")}
                 className="ml-2 text-xl font-bold text-gray-900"
               >
                 FlashDecks
@@ -56,7 +56,7 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/pricing" className="text-base text-gray-400 hover:text-white">
                       Pricing
                     </Link>
                   </li>
@@ -73,7 +73,7 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/status" className="text-base text-gray-400 hover:text-white">
                       API Status
                     </Link>
                   </li>
@@ -104,12 +104,12 @@ export default function Footer() {
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/blog" className="text-base text-gray-400 hover:text-white">
                       Blog
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/careers" className="text-base text-gray-400 hover:text-white">
                       Careers
                     </Link>
                   </li>
@@ -121,17 +121,17 @@ export default function Footer() {
                 </h3>
                 <ul className="mt-4 space-y-4">
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/privacy" className="text-base text-gray-400 hover:text-white">
                       Privacy Policy
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/terms" className="text-base text-gray-400 hover:text-white">
                       Terms of Service
                     </Link>
                   </li>
                   <li>
-                    <Link href="/" className="text-base text-gray-400 hover:text-white">
+                    <Link href="/cookies" className="text-base text-gray-400 hover:text-white">
                       Cookie Policy
                     </Link>
                   </li>
@@ -146,9 +146,9 @@ export default function Footer() {
           <p className="text-base text-gray-400">
             &copy; 2025 FlashDecks. All rights reserved.
           </p>
-          <p className="text-sm text-indigo-400 mt-2 italic">
+          <Link href='/for-her' className="text-sm text-indigo-400 mt-2 italic">
             Built with love for Riya 💜
-          </p>
+          </Link>
         </div>
       </div>
     </footer>
