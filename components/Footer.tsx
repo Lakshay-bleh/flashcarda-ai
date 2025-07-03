@@ -113,6 +113,11 @@ export default function Footer() {
                       Careers
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/love" className="text-base text-gray-400 hover:text-white opacity-0">
+                    For my love..
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div className="mt-12 md:mt-0">

@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from 'recharts';
+import { useMediaQuery } from '../../../utils/useMediaQuery'; // update import path
 
 type Deck = {
   id: string;
@@ -36,9 +37,10 @@ export default function AnalyticsPage() {
   const [decks, setDecks] = useState<Deck[]>([]);
   const [loading, setLoading] = useState(true);
   const [appUserId, setAppUserId] = useState<string | null>(null);
-
-  // Holds flashcard counts per deck
   const [flashcardCounts, setFlashcardCounts] = useState<Record<string, number>>({});
+
+  // Detect mobile screen width
+  const isMobile = useMediaQuery('(max-width: 600px)');
 
   useEffect(() => {
     if (!isSignedIn) router.push('/sign-in');
@@ -74,7 +76,6 @@ export default function AnalyticsPage() {
     }
   };
 
-  // Fetch flashcards count per deck in parallel
   const fetchFlashcardCounts = async (decks: Deck[]) => {
     try {
       const counts: Record<string, number> = {};
@@ -97,7 +98,6 @@ export default function AnalyticsPage() {
     if (!appUserId) return;
 
     async function loadData() {
-      // Assert appUserId is non-null here
       const fetchedDecks = await fetchDecks(appUserId!);
       if (fetchedDecks.length > 0) {
         await fetchFlashcardCounts(fetchedDecks);
@@ -121,7 +121,11 @@ export default function AnalyticsPage() {
     <div className="min-h-screen flex bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-600 text-white font-sans transition-colors">
       <Sidebar />
 
-      <main className="flex-grow flex flex-col py-12 px-8 sm:px-12 lg:px-16 overflow-auto">
+      <main
+        className={`flex-grow flex flex-col py-12 ${
+          isMobile ? 'px-4' : 'px-8 sm:px-12 lg:px-16'
+        } overflow-auto`}
+      >
         <header className="flex justify-between items-center mb-12 border-b border-white/20 pb-6">
           <h2 className="text-4xl font-extrabold tracking-tight drop-shadow-md">
             Analytics Dashboard
@@ -164,18 +168,41 @@ export default function AnalyticsPage() {
             </div>
 
             {/* Flashcards per deck bar chart */}
-            <section className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-xl border border-white/20">
+            <section
+              className={`bg-white/10 backdrop-blur-md rounded-2xl shadow-xl border border-white/20 ${
+                isMobile ? 'p-4' : 'p-8'
+              }`}
+            >
               <h3 className="text-2xl font-semibold mb-6 text-center">Flashcards per Deck</h3>
 
-              <ResponsiveContainer width="100%" height={320}>
-                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255 255 255 / 0.2)" />
-                  <XAxis dataKey="name" stroke="white" tick={{ fill: 'white' }} />
-                  <YAxis stroke="white" tick={{ fill: 'white' }} />
-                  <Tooltip contentStyle={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#000' }} />
-                  <Bar dataKey="flashcards" fill="#ec4899" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              {isMobile ? (
+                // Mobile: enable horizontal scroll and dynamic width, smaller height
+                <div style={{ overflowX: 'auto', minWidth: '100%' }}>
+                  <ResponsiveContainer
+                    width={Math.max(chartData.length * 60, 300)} // 60px per bar minimum width
+                    height={200}
+                  >
+                    <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255 255 255 / 0.2)" />
+                      <XAxis dataKey="name" stroke="white" tick={{ fill: 'white' }} />
+                      <YAxis stroke="white" tick={{ fill: 'white' }} />
+                      <Tooltip contentStyle={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#000' }} />
+                      <Bar dataKey="flashcards" fill="#ec4899" radius={[6, 6, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                // Desktop: full width 100%, fixed height 320, no scroll
+                <ResponsiveContainer width="100%" height={320}>
+                  <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255 255 255 / 0.2)" />
+                    <XAxis dataKey="name" stroke="white" tick={{ fill: 'white' }} />
+                    <YAxis stroke="white" tick={{ fill: 'white' }} />
+                    <Tooltip contentStyle={{ backgroundColor: 'rgba(255,255,255,0.9)', color: '#000' }} />
+                    <Bar dataKey="flashcards" fill="#ec4899" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </section>
           </motion.div>
         )}

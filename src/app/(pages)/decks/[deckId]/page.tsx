@@ -10,6 +10,7 @@ import FlashcardGenerator from '../../../../../components/FlashcardGenerator';
 import Sidebar from '../../../../../components/Sidebar';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import { useMediaQuery } from '../../../../utils/useMediaQuery';
 
 type Flashcard = {
   id: string;
@@ -37,6 +38,8 @@ export default function DeckPage() {
   const [editAnswer, setEditAnswer] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [deleteLoadingId, setDeleteLoadingId] = useState<string | null>(null);
+
+  const isSmallScreen = useMediaQuery('(max-width: 639px)'); 
 
   useEffect(() => {
     if (!deckId) {
@@ -159,22 +162,20 @@ export default function DeckPage() {
       <Sidebar />
 
       <main className="flex-grow flex flex-col py-12 px-8 sm:px-12 lg:px-16 overflow-auto">
-        {/* Header */}
-        <header className="flex justify-between items-center mb-12 border-b border-white/20 pb-6">
-          <h1 className="text-4xl font-extrabold tracking-tight drop-shadow-md">
+        {isSmallScreen ? (
+        // Mobile Header
+        <header className="flex flex-col justify-between items-start mb-12 border-b border-white/20 pb-6 gap-6">
+          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-md w-full text-center">
             {deckName || 'Deck Name'}
           </h1>
 
-          <div className="flex gap-4 items-center">
-            {/* Button to go to review page */}
+          <div className="flex w-full gap-4">
             <button
               onClick={() => router.push(`/decks/${deckId}/flashcards`)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium text-sm transition shadow-md hover:shadow-xl"
             >
               View Flashcards
             </button>
-
-            {/* Share Button */}
             <button
               onClick={() => {
                 const slug = 'flashcards';
@@ -182,11 +183,41 @@ export default function DeckPage() {
                 navigator.clipboard.writeText(shareUrl);
                 toast.success('Deck link copied to clipboard!');
               }}
+              className="flex-1 px-4 py-2 border border-white/30 rounded-lg hover:bg-white/10 text-sm text-white transition text-center"
             >
               🔗 Share
             </button>
           </div>
         </header>
+      ) : (
+        // Desktop Header
+        <header className="flex justify-between items-center mb-12 border-b border-white/20 pb-6">
+          <h1 className="text-4xl font-extrabold tracking-tight drop-shadow-md">
+            {deckName || 'Deck Name'}
+          </h1>
+
+          <div className="flex gap-4 items-center">
+            <button
+              onClick={() => router.push(`/decks/${deckId}/flashcards`)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
+            >
+              View Flashcards
+            </button>
+
+            <button
+              onClick={() => {
+                const slug = 'flashcards';
+                const shareUrl = `${window.location.origin}/decks/${deckId}/share/${slug}`;
+                navigator.clipboard.writeText(shareUrl);
+                toast.success('Deck link copied to clipboard!');
+              }}
+              className="px-6 py-3 border border-white/30 rounded-lg hover:bg-white/10 text-white transition"
+            >
+              🔗 Share
+            </button>
+          </div>
+        </header>
+      )}
 
         {/* Flashcard Generator */}
         <FlashcardGenerator deckId={deckId} onGenerated={() => {}} />

@@ -154,21 +154,22 @@ export default function FlashcardReviewPage({ params }: { params: { deckId: stri
 
       <main className="flex-grow flex flex-col py-12 px-8 sm:px-12 lg:px-16 overflow-auto">
         {/* Header */}
-        <header className="flex justify-between items-center mb-12 border-b border-white/20 pb-6">
-          <h1 className="text-4xl font-extrabold tracking-tight drop-shadow-md">
+        <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-12 border-b border-white/20 pb-6 gap-6">
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow-md text-center sm:text-left w-full sm:w-auto">
             Flashcards Review
           </h1>
-
-          <div className="flex gap-4 items-center">
-
-            {/* Start Studying Button */}
+          <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center sm:justify-end">
             <button
               onClick={() => router.push(`/decks/${deckId}/study`)}
-              className="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold shadow-md transition"
+              className="
+                bg-indigo-600 hover:bg-indigo-700 rounded-lg font-semibold shadow-md transition
+                px-3 py-2 text-sm
+                sm:px-4 sm:py-2.5 sm:text-base
+                lg:px-5 lg:py-3 lg:text-base
+              "
             >
               Enter Study Mode
             </button>
-
           </div>
         </header>
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, CSSProperties } from 'react';
 import { supabase } from '../src/lib/supabase';
 import toast from 'react-hot-toast';
 import ReactMarkdown from 'react-markdown';
@@ -29,23 +29,22 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:8
 export default function FlashcardGenerator({
   deckId,
   onGenerated,
+  sx,
 }: {
   deckId: string;
   onGenerated: () => void;
+  sx?: CSSProperties; // <-- add sx prop here
 }) {
   const [text, setText] = useState('');
-  const [numQuestionsStr, setNumQuestionsStr] = useState('3'); // keep as string to fix leading zero problem
+  const [numQuestionsStr, setNumQuestionsStr] = useState('3');
   const [previewFlashcards, setPreviewFlashcards] = useState<Flashcard[]>([]);
   const [error, setError] = useState('');
 
-  // Separate loading states
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [loadingGenerate, setLoadingGenerate] = useState(false);
 
-  // Ref to track if generate button was clicked to cancel preview
   const generatingRef = useRef(false);
 
-  // Parse number questions safely, fallback to 3
   const numQuestions = (() => {
     const parsed = parseInt(numQuestionsStr, 10);
     if (isNaN(parsed)) return 3;
@@ -56,7 +55,7 @@ export default function FlashcardGenerator({
 
   const debouncedFetchPreview = useRef(
     debounce(async (inputText: string, numQ: number) => {
-      if (generatingRef.current) return; // skip if generating
+      if (generatingRef.current) return;
 
       if (!inputText.trim()) {
         setPreviewFlashcards([]);
@@ -107,7 +106,7 @@ export default function FlashcardGenerator({
     generatingRef.current = true;
     setLoadingGenerate(true);
     setError('');
-    setPreviewFlashcards([]); // clear preview during generation
+    setPreviewFlashcards([]);
 
     try {
       const res = await fetch(`${API_BASE_URL}/generate`, {
@@ -178,19 +177,20 @@ export default function FlashcardGenerator({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
       className="bg-white/10 backdrop-blur-md p-8 rounded-2xl shadow-2xl border border-white/20 mb-12 space-y-6 transition-all hover:scale-[1.01] text-white"
+      style={sx} // <-- Apply the sx styles here inline
     >
       <h2 className="text-3xl font-semibold drop-shadow mb-4">Generate Flashcards</h2>
 
       <textarea
         rows={5}
-        className="w-full p-4 rounded-lg border border-white/20 bg-white/20 text-white placeholder-indigo-200 focus:ring-2 focus:ring-pink-300 focus:outline-none transition"
+        className="w-full p-4 rounded-lg border border-white/20 bg-white/20 text-white placeholder-indigo-200 focus:ring-2 focus:ring-pink-300 focus:outline-none transition mb-6"
         placeholder="Paste paragraph or text here..."
         value={text}
         onChange={(e) => setText(e.target.value)}
         disabled={loadingGenerate}
       />
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row items-center gap-4">
         <input
           type="number"
           min={1}
@@ -205,20 +205,20 @@ export default function FlashcardGenerator({
               setNumQuestionsStr(sanitized);
             }
           }}
-          className="w-24 p-3 rounded-lg border border-white/20 bg-white/20 text-white"
+          className="w-full sm:w-24 p-3 rounded-lg border border-white/20 bg-white/20 text-white"
           disabled={loadingGenerate}
         />
         <button
           onClick={generate}
           disabled={loadingGenerate || !text.trim()}
-          className="bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
+          className="w-full sm:w-auto bg-pink-500 hover:bg-pink-600 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
         >
           {loadingGenerate ? 'Generating...' : '⚡ Generate'}
         </button>
         <button
           onClick={clearInputs}
           disabled={loadingGenerate}
-          className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
+          className="w-full sm:w-auto bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition shadow-md hover:shadow-xl"
         >
           Clear
         </button>

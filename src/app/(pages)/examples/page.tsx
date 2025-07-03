@@ -303,7 +303,8 @@ export default function FlashcardDemo() {
       </Typography>
       <Box
         sx={{
-          width: { xs: 380, sm: 480 },
+          width: { xs: '100%', sm: 480 },
+          maxWidth: 480,
           mx: 'auto',
           mb: 3,
           perspective: 1200,
@@ -324,7 +325,7 @@ export default function FlashcardDemo() {
           }}
           sx={{
             width: '100%',
-            height: 260,
+            height: { xs: 220, sm: 260 },
             borderRadius: 4,
             bgcolor: 'background.paper',
             color: progressFlipped ? 'black' : 'pink.700',
@@ -332,7 +333,7 @@ export default function FlashcardDemo() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 26,
+            fontSize: { xs: 20, sm: 26 },
             fontWeight: 700,
             textAlign: 'center',
             transformStyle: 'preserve-3d',
@@ -430,21 +431,22 @@ export default function FlashcardDemo() {
         Use Tab to focus and press Enter or Space to flip the flashcard.
         </Typography>
         <Box
-        tabIndex={0}
-        role="button"
-        aria-label="Flip flashcard using keyboard only"
-        onKeyDown={handleAccessKeyDown}
-        onClick={() => setAccessFlipped(!accessFlipped)}
-        sx={{
-            width: { xs: 380, sm: 480 },
-            height: 260,
+          tabIndex={0}
+          role="button"
+          aria-label="Flip flashcard using keyboard only"
+          onKeyDown={handleAccessKeyDown}
+          onClick={() => setAccessFlipped(!accessFlipped)}
+          sx={{
+            width: { xs: '100%', sm: 480 },
+            maxWidth: 480,
+            height: { xs: 220, sm: 260 },
             perspective: 1200,
             cursor: 'pointer',
             outline: 'none',
             userSelect: 'none',
             mx: 'auto',
             mb: 3,
-        }}
+          }}
         >
         <Paper
             elevation={10}
@@ -522,17 +524,22 @@ export default function FlashcardDemo() {
       <Box
         sx={{
           width: '100%',
-          maxWidth: 720,
+          maxWidth: { xs: 400, sm: 720 }, // slightly wider on mobile
           mx: 'auto',
-          py: 6,
-          px: 5,
+          py: { xs: 3, sm: 6 },
+          px: { xs: 2, sm: 5 },
           borderRadius: 4,
           bgcolor: 'rgba(255 255 255 / 0.15)',
           boxShadow: '0 8px 16px rgba(0,0,0,0.15)',
           mb: 3,
+          height: { xs: 'auto', sm: 'auto' },
         }}
       >
-        <FlashcardGenerator deckId="demo-deck" onGenerated={() => { /* handle generated flashcards */ }} />
+         <FlashcardGenerator
+          deckId="demo-deck"
+          onGenerated={() => {}}
+          sx={{ width: '100%' }} 
+        />
       </Box>
     </Box>
   );

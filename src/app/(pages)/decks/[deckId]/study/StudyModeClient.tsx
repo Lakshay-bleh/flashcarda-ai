@@ -307,40 +307,43 @@ export default function StudyModePage({ deckId }: StudyModePageProps) {
 
         {/* Stats */}
         <Stack
-          direction={{ xs: 'column', sm: 'row' }}
-          spacing={{ xs: 2, sm: 6 }}
+          direction="row"           // Always horizontal
+          spacing= {{ xs: 2, sm: 6 }}               // small spacing on mobile
+          flexWrap="wrap"           // allow wrapping if too long on small screen
           color="rgba(255,255,255,0.9)"
           mb={6}
           fontWeight="600"
           fontSize="1.1rem"
+          justifyContent="center"   // center items horizontally
         >
           <Box>
             <Typography>Progress</Typography>
-            <Typography fontWeight="bold" fontSize="1.5rem" color="#f9a8d4">
+            <Typography textAlign="center" fontWeight="bold" fontSize="1.5rem" color="#f9a8d4">
               {Math.min(index, cards.length)} / {cards.length}
             </Typography>
           </Box>
           <Box>
             <Typography>Known</Typography>
-            <Typography fontWeight="bold" fontSize="1.5rem" color="#f9a8d4">
+            <Typography textAlign="center" fontWeight="bold" fontSize="1.5rem" color="#f9a8d4">
               {knownCards.size}
             </Typography>
           </Box>
           <Box>
             <Typography>Max Streak</Typography>
-            <Typography fontWeight="bold" fontSize="1.5rem" color="#f9a8d4">
+            <Typography textAlign="center" fontWeight="bold" fontSize="1.5rem" color="#f9a8d4">
               {maxStreak}
             </Typography>
           </Box>
           <Box>
             <Typography>Elapsed</Typography>
-            <Typography fontWeight="bold" fontSize="1.5rem" color="#f9a8d4">
+            <Typography textAlign="center" fontWeight="bold" fontSize="1.5rem" color="#f9a8d4">
               {Math.floor(elapsedTime / 60)}:{elapsedTime % 60 < 10 ? '0' : ''}{elapsedTime % 60}
             </Typography>
           </Box>
-          <Box>
+          <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
             <Typography>Timer</Typography>
             <Typography
+              textAlign="center" 
               fontWeight="bold"
               fontSize="1.5rem"
               sx={{

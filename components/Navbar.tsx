@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useUser, useAuth } from '@clerk/nextjs';
+import { usePathname } from 'next/navigation';
 
 import {
   Menu,
@@ -19,6 +20,7 @@ import {
   Settings,
   Logout,
   HelpOutline,
+  Home as HomeIcon,
 } from '@mui/icons-material';
 
 export default function Navbar() {
@@ -27,6 +29,37 @@ export default function Navbar() {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
+
+  const [isMobile, setIsMobile] = useState(false);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 640); // Tailwind sm breakpoint
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // only these links show Home icon on their pages
+  const LinkPaths = [
+    '/features',
+    '/examples',
+    '/updates',
+    '/pricing',
+    '/docs',
+    '/status',
+    '/contact',
+    '/help',
+    '/about',
+    '/blog',
+    '/careers',
+    '/privacy',
+    '/terms',
+    '/cookies',
+    '/love'
+  ];
+
+  const showHomeIcon = isMobile && LinkPaths.includes(pathname);
 
   const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -39,15 +72,24 @@ export default function Navbar() {
   return (
     <nav className="bg-white shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16 items-center">
-          
-          {/* Dedication Text - Visible on md+ screens */}
-          <Link href="/for-her" className="hidden md:block text-sm text-indigo-500 italic tracking-wide whitespace-nowrap">
-            ✨ Dedicated to Riya
-          </Link>
+        <div className="flex h-16 items-center justify-between">
+          {/* 1. Home Icon Button on extreme left (mobile only + footer link pages only) */}
+          {showHomeIcon && (
+            <Link
+              href={isSignedIn ? '/home' : '/'}
+              aria-label="Home"
+              className="ml-1 text-indigo-600 hover:text-indigo-800 flex items-center"
+            >
+              <HomeIcon fontSize="large" />
+            </Link>
+          )}
 
-          {/* Logo Section */}
-          <div className="flex items-center">
+          {/* 2. Main logo area (centered on mobile, left-aligned on desktop) */}
+          <div
+            className={`flex items-center ${
+              showHomeIcon ? 'justify-center flex-1' : 'justify-center sm:justify-start flex-1'
+            } sm:flex-none sm:ml-0 ml-4 -translate-x-2 sm:translate-x-0`}
+          >
             <svg
               className="h-8 w-8 text-indigo-600"
               fill="currentColor"
@@ -68,9 +110,8 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* Navigation Links + User Section */}
+          {/* 3. Navigation Links + User Section */}
           <div className="hidden sm:flex items-center space-x-6">
-            {/* Home Link */}
             <Link
               href={isSignedIn ? '/home' : '/'}
               className="text-gray-500 hover:text-gray-700 text-sm font-medium"
@@ -78,7 +119,6 @@ export default function Navbar() {
               Home
             </Link>
 
-            {/* Pricing Link - Always Visible */}
             <Link
               href="/pricing"
               className="text-gray-500 hover:text-gray-700 text-sm font-medium"
@@ -86,7 +126,6 @@ export default function Navbar() {
               Pricing
             </Link>
 
-            {/* Conditional Navigation */}
             {isSignedIn ? (
               <>
                 <Link
@@ -119,10 +158,13 @@ export default function Navbar() {
               </>
             )}
 
-            {/* User Menu or Sign Up */}
             {isSignedIn ? (
               <>
-                <IconButton onClick={handleMenuClick} sx={{ p: 0 }} aria-label="User menu">
+                <IconButton
+                  onClick={handleMenuClick}
+                  sx={{ p: 0 }}
+                  aria-label="User menu"
+                >
                   <Avatar
                     sx={{
                       bgcolor: 'indigo.600',
