@@ -94,7 +94,8 @@ export default function Home() {
                 href="/sign-up"
                 className="flex-1 max-w-[200px] text-center px-6 py-3 text-base font-medium rounded-md text-white bg-indigo-500 hover:bg-indigo-600 border border-transparent transition-all leading-snug"
               >
-                See How it Works
+                <span className="block sm:inline">See How</span>{' '}
+                <span className="block sm:inline">It Works</span>
               </Link>
              </div>
             </div>
