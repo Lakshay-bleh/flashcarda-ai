@@ -124,3 +124,7 @@ def generate_flashcards(input: InputText):
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+@app.route("/", methods=["GET"])
+def root():
+    return {"app": "working"}
