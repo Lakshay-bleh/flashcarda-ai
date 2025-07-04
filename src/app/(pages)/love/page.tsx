@@ -24,17 +24,15 @@ export default function ForHerSecretPage() {
         </h2>
 
         <p className="text-lg sm:text-xl text-gray-700 leading-relaxed text-left font-light tracking-wide animate-fade-in">
-          We met in a classroom full of dreams, at Vidyamandir, when life was still drawing its outlines — and somehow, between pages of notebooks and shared glances, your presence began to mean more than I could have imagined.
+          You are the most beautiful, most special, best thing that ever happened to me. 
           <br /><br />
-          Since then, every moment with you has unfolded like a quiet miracle. We&apos;ve walked through laughter and quiet tears, through unexpected milestones and unplanned memories, collecting small pieces of forever with each step.
+          My life is filled with flowers after meeting you. I feel comfort, love, care, peace with you...
           <br /><br />
-          Whether it was simple conversations or silent companionship, every second with you stitched itself into my heart like the soft hum of our favorite song — <em>Mrignayani</em> — a tune that now plays in the background of everything I do.
+          I am blessed to have you in my life. As my love, As my life partner for whom I can do everything.
           <br /><br />
-          You&apos;ve been my calm in chaos, my fire when I flicker, and the one who makes the ordinary feel magical.
-          We&apos;ve grown together, changed, discovered pieces of ourselves we didn’t know existed — and through it all, your love has been the most grounding and beautiful part of my world.
+          This is a very small thing to just show how much you matter to me.
           <br /><br />
-          In your eyes, I’ve found home; in your soul, I’ve felt peace.
-          Every moment shared, every word, every silence — it all adds up to a love I never want to live without.
+          I build this site with your constant support and love. This is dedicated to you my love.
         </p>
 
         <p className="text-2xl sm:text-3xl text-pink-600 font-semibold text-center mt-6 animate-heartbeat">
