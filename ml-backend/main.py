@@ -1,18 +1,26 @@
-from fastapi import FastAPI # type: ignore
-from fastapi.middleware.cors import CORSMiddleware # type: ignore
-from pydantic import BaseModel # type: ignore
-from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForQuestionAnswering  # type: ignore
-import spacy # type: ignore
-import spacy.cli # type: ignore
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+from transformers import (
+    pipeline,
+    AutoModelForSeq2SeqLM,
+    AutoModelForQuestionAnswering,
+    T5Tokenizer,
+    AutoTokenizer
+)
+import spacy
+import spacy.cli
 import re
 from functools import lru_cache
-import torch # type: ignore
+import torch
 
-# Download spaCy model if not present
+# Download spaCy model if not already installed
 spacy.cli.download("en_core_web_sm")
 
 app = FastAPI()
 
+# Allow frontend CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["https://flashcards-ai-g0mp.onrender.com"],
@@ -21,33 +29,50 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load spaCy model globally 
+# Load spaCy for noun phrase extraction
 nlp = spacy.load("en_core_web_sm")
 
+
+# Handle unexpected exceptions globally
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"error": f"Internal server error: {str(exc)}"},
+    )
+
+
+# Improved input validation
+class InputText(BaseModel):
+    text: str = Field(..., min_length=10, max_length=1500)
+    num_questions: int = Field(default=3, ge=1, le=5)
+
+
+# Question generation model + tokenizer (T5 uses SentencePiece)
 @lru_cache()
 def get_qg_pipeline():
     model_name = "valhalla/t5-small-qa-qg-hl"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
     try:
-        model = AutoModelForSeq2SeqLM.from_pretrained(model_name, torch_dtype=torch.float16)
-    except Exception:
+        tokenizer = T5Tokenizer.from_pretrained(model_name, use_fast=False)
         model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-    return pipeline("text2text-generation", model=model, tokenizer=tokenizer)
+        return pipeline("text2text-generation", model=model, tokenizer=tokenizer)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load QG model: {e}")
 
+
+# Question answering pipeline (DistilBERT SQuAD)
 @lru_cache()
 def get_qa_pipeline():
     model_name = "distilbert-base-cased-distilled-squad"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
     try:
-        model = AutoModelForQuestionAnswering.from_pretrained(model_name, torch_dtype=torch.float16)
-    except Exception:
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
         model = AutoModelForQuestionAnswering.from_pretrained(model_name)
-    return pipeline("question-answering", model=model, tokenizer=tokenizer)
+        return pipeline("question-answering", model=model, tokenizer=tokenizer)
+    except Exception as e:
+        raise RuntimeError(f"Failed to load QA model: {e}")
 
-class InputText(BaseModel):
-    text: str
-    num_questions: int = 3  # default reduced for memory
 
+# Extract answer candidates from text using spaCy noun chunks
 def extract_answers(text, max_answers=10):
     doc = nlp(text)
     answers = []
@@ -59,20 +84,15 @@ def extract_answers(text, max_answers=10):
             break
     return answers
 
+
 @app.post("/generate")
 def generate_flashcards(input: InputText):
     paragraph = input.text.strip()
-    num = min(input.num_questions, 5)  # cap max questions to 5 for memory
+    num = min(input.num_questions, 5)
 
     if not paragraph:
         return {"flashcards": []}
 
-    if len(paragraph) > 1500:
-            return {
-                "error": "Input text is too long. Please limit to 1500 characters.",
-                "flashcards": []
-            }
-    
     try:
         qg_pipeline = get_qg_pipeline()
         qa_pipeline = get_qa_pipeline()
@@ -80,10 +100,11 @@ def generate_flashcards(input: InputText):
         answers = extract_answers(paragraph, max_answers=num)
         if not answers:
             answers = ["this topic"]
-            
+
         flashcards = []
 
         for answer in answers:
+            # Highlight the answer in text
             highlighted_text = re.sub(
                 rf'\b{re.escape(answer)}\b',
                 f'<hl> {answer} <hl>',
@@ -103,6 +124,7 @@ def generate_flashcards(input: InputText):
             if not question.endswith("?"):
                 question += "?"
 
+            # Get answer from context using QA model
             try:
                 answer_obj = qa_pipeline(question=question, context=paragraph)
                 answer_text = answer_obj.get("answer", "").strip() or answer
@@ -118,13 +140,16 @@ def generate_flashcards(input: InputText):
                 break
 
         return {"flashcards": flashcards}
+
     except Exception as e:
         return {"error": f"Something went wrong: {str(e)}", "flashcards": []}
+
 
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
+
 @app.get("/")
-async def root():
+def root():
     return {"app": "working"}
