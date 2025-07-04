@@ -1,12 +1,12 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForQuestionAnswering
-import spacy
-import spacy.cli
+from fastapi import FastAPI # type: ignore
+from fastapi.middleware.cors import CORSMiddleware # type: ignore
+from pydantic import BaseModel # type: ignore
+from transformers import pipeline, AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForQuestionAnswering  # type: ignore
+import spacy # type: ignore
+import spacy.cli # type: ignore
 import re
 from functools import lru_cache
-import torch
+import torch # type: ignore
 
 # Download spaCy model if not present
 spacy.cli.download("en_core_web_sm")
