@@ -151,9 +151,9 @@ export default function Footer() {
           <p className="text-base text-gray-400">
             &copy; 2025 FlashDecks. All rights reserved.
           </p>
-          {/* <Link href='/for-her' className="text-sm text-indigo-400 mt-2 italic">
+          <Link href='/for-her' className="text-sm text-indigo-400 mt-2 italic">
             Built with love for Riya 💜
-          </Link> */}
+          </Link>
         </div>
       </div>
     </footer>

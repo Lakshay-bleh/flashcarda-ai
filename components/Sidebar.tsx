@@ -140,7 +140,7 @@ const SidebarContent = ({
           <ListItemText primary="Sign Out" />
         </ListItemButton>
 
-        {/* <Typography
+        <Typography
           variant="body2"
           sx={{
             mt: 2,
@@ -150,7 +150,7 @@ const SidebarContent = ({
           }}
         >
           For the love of my life..
-        </Typography> */}
+        </Typography>
       </Box>
     </Box>
   );

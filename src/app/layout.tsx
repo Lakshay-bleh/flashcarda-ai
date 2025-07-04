@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata = {
-  title: 'FlashDecks',
+  title: 'FlashDecks - For Riya',
   description: 'The smart way to study and retain information using scientifically proven techniques.',
   keywords: ['flashcards', 'AI', 'study tool', 'learning', 'dedication', 'Riya'],
   authors: [{ name: 'Lakshay Riya Jain' }],
