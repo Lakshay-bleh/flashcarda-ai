@@ -5,6 +5,29 @@
   --foreground: #171717;
 }
 
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+.animate-typewriter {
+  display: inline-block;
+  overflow: hidden;
+  border-right: 2px solid #ec4899; /* Tailwind pink-500 */
+  animation: typing 3s steps(30, end) forwards, blink 0.75s step-end infinite;
+  max-width: 100%;
+}
+
 @media (max-width: 450px) {
   .btn-break {
     display: block;

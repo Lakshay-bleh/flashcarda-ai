@@ -55,7 +55,7 @@ export default function ForHerPage() {
         </h1>
 
         {/* Typewriter intro */}
-        <p className="text-xl text-gray-700 font-mono animate-typing overflow-hidden whitespace-nowrap border-r-4 border-pink-600 pr-4 mb-6">
+        <p className="text-xl text-gray-700 font-mono animate-typing overflow-hidden border-r-4 border-pink-600 pr-4 mb-6">
           You didn’t ask for this, but you inspire everything I do...
         </p>
 

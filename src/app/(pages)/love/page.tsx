@@ -23,23 +23,25 @@ export default function ForHerSecretPage() {
           For the One Who Changed Everything 💖
         </h2>
 
-        <p className="text-lg sm:text-xl text-gray-700 leading-relaxed text-left font-light tracking-wide animate-fade-in">
-          You are the most beautiful, most special, best thing that ever happened to me. 
-          <br /><br />
-          My life is filled with flowers after meeting you. I feel comfort, love, care, peace with you...
-          <br /><br />
-          I am blessed to have you in my life. As my love, As my life partner for whom I can do everything.
-          <br /><br />
-          This is a very small thing to just show how much you matter to me.
-          <br /><br />
-          I build this site with your constant support and love. This is dedicated to you my love.
-        </p>
+        <div className="z-10 w-full max-w-3xl px-4 sm:px-8 bg-white/70 backdrop-blur-md p-6 sm:p-10 rounded-3xl shadow-2xl border border-pink-200 animate-fade-in-up space-y-8">
+          <p className="text-lg sm:text-xl text-gray-700 leading-relaxed text-left font-light tracking-wide animate-fade-in break-words">
+            You are the most beautiful, most special, best thing that ever happened to me. 
+            <br /><br />
+            My life is filled with flowers after meeting you. I feel comfort, love, care, peace with you...
+            <br /><br />
+            I am blessed to have you in my life. As my love, As my life partner for whom I can do everything.
+            <br /><br />
+            This is a very small thing to just show how much you matter to me.
+            <br /><br />
+            I build this site with your constant support and love. This is dedicated to you my love.
+          </p>
 
-        <p className="text-2xl sm:text-3xl text-pink-600 font-semibold text-center mt-6 animate-heartbeat">
-          I love you, Riya Lakshay Jain.
-          <br />
-          <span className="block mt-1 text-pink-500 italic text-lg">– Your lover...</span>
-        </p>
+          <p className="text-2xl sm:text-3xl text-pink-600 font-semibold text-center mt-6 animate-heartbeat">
+            I love you, Riya Lakshay Jain.
+            <br />
+            <span className="block mt-1 text-pink-500 italic text-lg">– Your lover...</span>
+          </p>
+          </div>
       </div>
     </div>
   );
