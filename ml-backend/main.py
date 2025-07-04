@@ -39,7 +39,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Load lightweight T5 model for QG
 @lru_cache()
 def get_qg_pipeline():
-    model_name = "iarfmoose/tiny-t5-qa-qg"
+    model_name = "mrm8488/t5-base-finetuned-question-generation-ap "
     try:
         tokenizer = T5Tokenizer.from_pretrained(model_name, use_fast=False, legacy=True)
         model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
