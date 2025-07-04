@@ -46,10 +46,10 @@ export default function FlashcardGenerator({
   const generatingRef = useRef(false);
 
   const numQuestions = (() => {
-    const parsed = parseInt(numQuestionsStr, 10);
+    const parsed = parseInt(numQuestionsStr, 5);
     if (isNaN(parsed)) return 3;
     if (parsed < 0) return 0;
-    if (parsed > 10) return 10;
+    if (parsed > 5) return 5;
     return parsed;
   })();
 
@@ -150,11 +150,7 @@ export default function FlashcardGenerator({
     } catch (err: unknown) {
       console.error('Error during generate:', err);
       toast.error('Failed to generate or save flashcards.');
-      setError(
-        err && typeof err === 'object' && 'message' in err
-          ? String((err as { message: string }).message)
-          : 'Something went wrong. Check backend or input.'
-      );
+      setError('Something went wrong while generating flashcards. Please try again.');
     } finally {
       setLoadingGenerate(false);
       generatingRef.current = false;
@@ -194,7 +190,7 @@ export default function FlashcardGenerator({
         <input
           type="number"
           min={1}
-          max={10}
+          max={5}
           value={numQuestionsStr}
           onChange={(e) => {
             const val = e.target.value;

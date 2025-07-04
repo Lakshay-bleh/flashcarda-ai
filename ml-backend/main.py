@@ -15,24 +15,22 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["https://flashcards-ai-g0mp.onrender.com"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Load spaCy model globally (small)
+# Load spaCy model globally 
 nlp = spacy.load("en_core_web_sm")
 
 @lru_cache()
 def get_qg_pipeline():
     model_name = "valhalla/t5-small-qa-qg-hl"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    # Try loading with fp16 if possible (reduce memory usage)
     try:
         model = AutoModelForSeq2SeqLM.from_pretrained(model_name, torch_dtype=torch.float16)
     except Exception:
-        # fallback to default if fp16 not supported
         model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
     return pipeline("text2text-generation", model=model, tokenizer=tokenizer)
 
@@ -69,11 +67,20 @@ def generate_flashcards(input: InputText):
     if not paragraph:
         return {"flashcards": []}
 
+    if len(paragraph) > 1500:
+            return {
+                "error": "Input text is too long. Please limit to 1500 characters.",
+                "flashcards": []
+            }
+    
     try:
         qg_pipeline = get_qg_pipeline()
         qa_pipeline = get_qa_pipeline()
 
         answers = extract_answers(paragraph, max_answers=num)
+        if not answers:
+            answers = ["this topic"]
+            
         flashcards = []
 
         for answer in answers:
@@ -113,3 +120,7 @@ def generate_flashcards(input: InputText):
         return {"flashcards": flashcards}
     except Exception as e:
         return {"error": f"Something went wrong: {str(e)}", "flashcards": []}
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
