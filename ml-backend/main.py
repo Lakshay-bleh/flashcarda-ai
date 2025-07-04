@@ -126,5 +126,5 @@ def health_check():
     return {"status": "ok"}
 
 @app.route("/", methods=["GET"])
-def root():
+async def root():
     return {"app": "working"}
