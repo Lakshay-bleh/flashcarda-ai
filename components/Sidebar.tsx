@@ -3,6 +3,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAuth} from '@clerk/nextjs'; // Clerk auth
+
 import {
   Box,
   Typography,
@@ -15,6 +17,7 @@ import {
   IconButton,
   useMediaQuery,
 } from '@mui/material';
+
 import {
   Home,
   Analytics,
@@ -22,8 +25,10 @@ import {
   Dashboard,
   School,
   HelpOutline,
+  Logout,
   Menu as MenuIcon,
 } from '@mui/icons-material';
+
 import { useTheme } from '@mui/material/styles';
 
 const navItems = [
@@ -35,87 +40,121 @@ const navItems = [
   { icon: <Settings />, label: 'Settings', href: '/settings' },
 ];
 
-const SidebarContent = ({ currentPath, onClickItem }: { currentPath: string, onClickItem?: () => void }) => (
-  <Box
-    sx={{
-      width: 280,
-      height: '100%',
-      bgcolor: 'rgba(255 255 255 / 0.05)',
-      backdropFilter: 'blur(12px)',
-      px: 3,
-      py: 6,
-      color: 'white',
-      display: 'flex',
-      flexDirection: 'column',
-      boxSizing: 'border-box',
-    }}
-  >
+const SidebarContent = ({
+  currentPath,
+  onClickItem,
+}: {
+  currentPath: string;
+  onClickItem?: () => void;
+}) => {
+  const { signOut } = useAuth();
+
+  return (
     <Box
       sx={{
+        width: 280,
+        height: '100%',
+        bgcolor: 'rgba(255 255 255 / 0.05)',
+        backdropFilter: 'blur(12px)',
+        px: 3,
+        py: 6,
+        color: 'white',
         display: 'flex',
-        alignItems: 'center',
-        gap: 2,
-        mb: 5,
-        userSelect: 'none',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        boxSizing: 'border-box',
       }}
     >
-      <svg
-        className="h-9 w-9 text-indigo-600"
-        fill="currentColor"
-        viewBox="0 0 20 20"
-      >
-        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
-        <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-      </svg>
-      <Typography variant="h6" fontWeight="bold" letterSpacing={1}>
-        FlashDecks
-      </Typography>
+      {/* Top Section: Logo and Navigation */}
+      <Box>
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            mb: 5,
+            userSelect: 'none',
+          }}
+        >
+          <svg
+            className="h-9 w-9 text-indigo-600"
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
+            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+          </svg>
+          <Typography variant="h6" fontWeight="bold" letterSpacing={1}>
+            FlashDecks
+          </Typography>
+        </Box>
+
+        <Divider sx={{ borderColor: 'rgba(255 255 255 / 0.2)', mb: 2 }} />
+
+        <List>
+          {navItems.map(({ icon, label, href }) => {
+            const isActive = currentPath === href || currentPath.startsWith(href + '/');
+            return (
+              <Link key={label} href={href} passHref>
+                <ListItemButton
+                  selected={isActive}
+                  onClick={onClickItem}
+                  sx={{
+                    color: isActive ? '#90caf9' : 'rgba(255 255 255 / 0.8)',
+                    bgcolor: isActive ? 'rgba(144, 202, 249, 0.2)' : 'transparent',
+                    '&:hover': {
+                      bgcolor: 'rgba(255 255 255 / 0.2)',
+                    },
+                    mb: 0.5,
+                    borderRadius: 1,
+                    transition: 'background-color 0.3s, color 0.3s',
+                  }}
+                >
+                  <ListItemIcon sx={{ color: 'inherit' }}>{icon}</ListItemIcon>
+                  <ListItemText primary={label} />
+                </ListItemButton>
+              </Link>
+            );
+          })}
+        </List>
+      </Box>
+
+      {/* Bottom Section: Sign Out and Footer */}
+      <Box>
+        <Divider sx={{ borderColor: 'rgba(255 255 255 / 0.2)', mb: 2 }} />
+
+        <ListItemButton
+          onClick={() => signOut()}
+          sx={{
+            color: 'rgba(255 255 255 / 0.8)',
+            '&:hover': {
+              bgcolor: 'rgba(255 255 255 / 0.2)',
+            },
+            borderRadius: 1,
+            transition: 'background-color 0.3s, color 0.3s',
+          }}
+        >
+          <ListItemIcon sx={{ color: 'inherit' }}>
+            <Logout />
+          </ListItemIcon>
+          <ListItemText primary="Sign Out" />
+        </ListItemButton>
+
+        {/* <Typography
+          variant="body2"
+          sx={{
+            mt: 2,
+            color: 'rgba(255 255 255 / 0.6)',
+            userSelect: 'none',
+            fontStyle: 'italic',
+          }}
+        >
+          For the love of my life..
+        </Typography> */}
+      </Box>
     </Box>
-
-    <Divider sx={{ borderColor: 'rgba(255 255 255 / 0.2)' }} />
-
-    <List sx={{ flexGrow: 1 }}>
-      {navItems.map(({ icon, label, href }) => {
-        const isActive = currentPath === href || currentPath.startsWith(href + '/');
-
-        return (
-          <Link key={label} href={href} passHref>
-            <ListItemButton
-              selected={isActive}
-              onClick={onClickItem}
-              sx={{
-                color: isActive ? '#90caf9' : 'rgba(255 255 255 / 0.8)',
-                bgcolor: isActive ? 'rgba(144, 202, 249, 0.2)' : 'transparent',
-                '&:hover': {
-                  bgcolor: 'rgba(255 255 255 / 0.2)',
-                },
-                mb: 0.5,
-                borderRadius: 1,
-                transition: 'background-color 0.3s, color 0.3s',
-              }}
-            >
-              <ListItemIcon sx={{ color: 'inherit' }}>{icon}</ListItemIcon>
-              <ListItemText primary={label} />
-            </ListItemButton>
-          </Link>
-        );
-      })}
-    </List>
-
-    <Divider sx={{ borderColor: 'rgba(255 255 255 / 0.2)', my: 3 }} />
-
-    <Typography
-      variant="body2"
-      sx={{
-        color: 'rgba(255 255 255 / 0.6)',
-        userSelect: 'none',
-        fontStyle: 'italic',
-      }}
-    >
-      For the love of my life..
-    </Typography>
-  </Box>
-);
+  );
+};
 
 const UnifiedSidebar: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -127,31 +166,28 @@ const UnifiedSidebar: React.FC = () => {
 
   return (
     <>
-      {/* Menu Button on Mobile */}
-{isMobile && !mobileOpen && (
-  <Box
-    sx={{
-      p: 2,
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      zIndex: 1300,
-    }}
-  >
-    <IconButton
-      onClick={toggleDrawer}
-      aria-label="Open menu"
-      sx={{
-        color: '#555 !important', 
-      }}
-    >
-      <MenuIcon sx={{ color: '#555 !important' }} />
-    </IconButton>
-  </Box>
-)}
+      {/* Mobile Menu Icon */}
+      {isMobile && !mobileOpen && (
+        <Box
+          sx={{
+            p: 2,
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            zIndex: 1300,
+          }}
+        >
+          <IconButton
+            onClick={toggleDrawer}
+            aria-label="Open menu"
+            sx={{ color: '#555 !important' }}
+          >
+            <MenuIcon sx={{ color: '#555 !important' }} />
+          </IconButton>
+        </Box>
+      )}
 
-
-      {/* Permanent Sidebar on Desktop */}
+      {/* Desktop Sidebar */}
       {!isMobile && (
         <Box
           component="nav"
@@ -166,7 +202,7 @@ const UnifiedSidebar: React.FC = () => {
         </Box>
       )}
 
-      {/* Drawer Sidebar on Mobile */}
+      {/* Mobile Drawer */}
       <Drawer
         anchor="left"
         open={mobileOpen}
